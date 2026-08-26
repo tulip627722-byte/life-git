@@ -1,0 +1,122 @@
+# Life Git 个人介绍导入文件
+# 编码：UTF-8
+# 日期统一使用 YYYY-MM 或 YYYY-MM-DD；仍在进行可写 "至今"。
+# visibility 可填写 public 或 private；没有填写时按 private 处理。
+
+schema_version: "1.0"
+
+profile:
+  display_name: "Tulip"
+  legal_name: ""                 # 可留空；默认不公开
+  headline: ""                   # 例：AI 产品实习生 · Agent 产品方向
+  tagline: ""                    # 首页一句话介绍
+  location: ""                   # 例：中国 · 上海
+  avatar: ""                     # 图片网址，或与本文件一起提交的图片文件名
+  cover_image: ""                # 可选
+  summary: |-
+    在这里写 2—4 句自我介绍。
+  current_focus:
+    - ""
+  exploring:
+    - ""
+  visibility: public
+
+contact:
+  email: ""
+  phone: ""
+  github: "https://github.com/tulip627722-byte"
+  website: ""
+  linkedin: ""
+  visibility: private            # 联系方式默认不出现在公开网页
+
+education:
+  - school: ""
+    program: ""
+    degree: ""
+    period: ""
+    description: ""
+    highlights:
+      - ""
+    visibility: public
+
+experiences:
+  - organization: ""
+    role: ""
+    period: ""
+    location: ""
+    summary: ""
+    achievements:
+      - statement: ""            # 做了什么、解决什么问题
+        evidence: ""             # 数据、作品或可验证结果；没有就留空
+        source_url: ""           # 可选：公开来源链接
+    skills:
+      - ""
+    visibility: public
+
+projects:
+  - id: "project-1"              # 英文、数字和短横线；不可重复
+    name: ""
+    role: ""
+    period: ""
+    status: "completed"          # idea / building / completed / archived
+    one_liner: ""
+    description: |-
+      在这里写项目背景、你的工作和最终结果。
+    highlights:
+      - ""
+    technologies:
+      - ""
+    github_url: ""
+    demo_url: ""
+    readme_url: ""
+    images:
+      - path: ""                 # 图片网址或图片文件名
+        caption: ""
+        alt: ""
+        visibility: public
+    featured: false               # true 表示首页代表项目
+    visibility: private           # 项目默认私密，确认后再改为 public
+
+skills:
+  - category: "产品"
+    items:
+      - name: ""
+        level: ""                # 可选：了解 / 熟悉 / 熟练
+        evidence: ""             # 对应项目、经历或成果
+  - category: "技术"
+    items:
+      - name: ""
+        level: ""
+        evidence: ""
+
+awards:
+  - title: ""
+    issuer: ""
+    date: ""
+    description: ""
+    source_url: ""
+    visibility: public
+
+life_commits:
+  - date: ""
+    type: "milestone"             # milestone / work / learning / idea / life
+    title: ""
+    description: ""
+    tags:
+      - ""
+    visibility: public
+
+readme:
+  # 留空时，Life Git 会根据上方已公开且有来源的信息生成草稿。
+  # 填写后则优先使用这里的文字；发布前仍需 Tulip 确认。
+  introduction: ""
+  current_focus: ""
+  representative_projects: ""
+  abilities_and_evidence: ""
+  recent_changes: ""
+  exploring: ""
+
+import_options:
+  default_visibility: private
+  replace_existing_profile: false # false = 合并；true = 覆盖原个人介绍
+  publish_automatically: false     # 固定为 false，导入后先预览再发布

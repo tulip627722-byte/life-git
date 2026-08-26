@@ -1,0 +1,599 @@
+{
+  "schema_version": "1.0",
+  "profile": {
+    "display_name": "余佳欣",
+    "english_name": "Tulip Yu",
+    "headline": "AI Product · Hardware · Builder",
+    "tagline": "会拆机器，也会拆模型；更喜欢把它们做成东西。",
+    "short_intro": "智能制造背景，正在往 AI 产品走。\n学过硬件和嵌入式，做过 AI 多模态产品，也在做 Agent。\n喜欢研究新技术，也喜欢把一个有意思的想法直接做出来。\n不太想被某一个岗位或技术标签定义。",
+    "long_intro": "我是智能制造专业学生，也是一个一直在往外探索的人。\n\n最开始接触的是硬件、嵌入式和智能制造。\n后来慢慢走到软件、AI、多模态产品，再到 Agent。\n\n我好像一直没有特别明确地决定自己“应该是什么”。\n比起沿着一条固定路线走到底，我更喜欢遇到一个觉得有意思的问题，\n然后把它拆开、研究、做出来。\n\n所以我可能会研究硬件，也可能研究大模型；\n会做 AI 产品，也会拆 Agent；\n会参加黑客松，也会去创业；\n会写 PRD，也会自己做 Prototype。\n\n我喜欢技术，但最终更喜欢的是“把东西做出来”。",
+    "location": "",
+    "education": {
+      "school": "西南大学",
+      "college": "",
+      "program": "智能制造—创新班",
+      "degree": "本科",
+      "period": "2024.09 - 2028.06"
+    },
+    "current_status": {
+      "identity": "学生 / AI 产品实践者 / Builder",
+      "current_direction": [
+        "AI 产品",
+        "Agent",
+        "AI 多模态",
+        "AI Coding",
+        "个人产品"
+      ],
+      "not_limited_to": [
+        "Agent",
+        "AI 产品经理",
+        "某一种技术栈"
+      ]
+    },
+    "visibility": "public"
+  },
+  "personality": {
+    "core_traits": [
+      {
+        "name": "好奇",
+        "description": "对新技术的兴趣很强。\n不太满足于知道一个产品“怎么用”，\n更喜欢继续追问它“为什么这样设计”“底层怎么实现”。"
+      },
+      {
+        "name": "爱拆",
+        "description": "遇到一个新东西会习惯性拆解。\n从产品形态一路往下追到模型、Agent、Memory、Skill、\nHarness 甚至代码执行机制。"
+      },
+      {
+        "name": "喜欢动手",
+        "description": "不太喜欢只停留在讨论。\n一个 idea 如果足够有意思，就会想自己做一个 Prototype。"
+      },
+      {
+        "name": "跨度大",
+        "description": "兴趣从硬件、嵌入式延伸到 AI、产品、Agent、\n黑客松和创业。\n不太愿意把自己限制在单一专业边界里。"
+      },
+      {
+        "name": "喜欢挑战",
+        "description": "对没有标准答案的问题更容易产生兴趣。\n比起重复执行成熟方案，更喜欢从 0 到 1 找答案。"
+      },
+      {
+        "name": "产品感",
+        "description": "不只是关注技术能不能实现，也会持续追问：\n用户为什么需要、真正的问题是什么、产品应该怎么设计。"
+      }
+    ],
+    "working_style": [
+      "先理解问题，再拆解问题",
+      "喜欢从第一性原理重新看问题",
+      "倾向快速做 Prototype 验证",
+      "遇到 Badcase 会继续往下找原因",
+      "不喜欢只做表面功能",
+      "对新技术保持长期好奇"
+    ],
+    "self_definition": "我不太想把自己定义成某一种职业。\n\n比起“我是 AI 产品经理”，\n我更愿意说自己是一个喜欢把技术和想法做成东西的人。"
+  },
+  "education": [
+    {
+      "id": "swu",
+      "school": "西南大学",
+      "program": "智能制造—创新班",
+      "period": "2024.09 - 2028.06",
+      "description": "智能制造专业背景。\n从硬件、嵌入式和制造相关知识出发，\n逐渐将兴趣扩展到软件、AI 和产品。",
+      "key_exposure": [
+        "硬件",
+        "嵌入式",
+        "智能制造",
+        "软件",
+        "AI",
+        "产品"
+      ],
+      "personal_meaning": "这是我理解“机器”的起点。\n\n后来虽然越来越往 AI 走，\n但我并不想把硬件和嵌入式这部分经历丢掉。",
+      "visibility": "public"
+    }
+  ],
+  "experiences": [
+    {
+      "id": "nio-agent",
+      "organization": "蔚来",
+      "role": "AI 产品实习",
+      "period": "2026",
+      "status": "ongoing",
+      "positioning": "Agent / AI 基础建设",
+      "one_liner": "从做一个 AI 功能，开始研究 Agent 到底应该怎么工作。",
+      "description": "参与企业 AI 与 Agent 方向的产品建设。\n\n从具体业务 Agent 出发，逐渐深入到 Team Agent、\nSkill、Memory、Task、Workflow 和 AI 需求流转等能力。\n\n开始关注的问题也从“模型能不能回答”变成：\n“AI 能不能真正完成一个任务，以及怎样让它稳定地完成任务”。",
+      "major_projects": [
+        {
+          "name": "Team Agent",
+          "role": "AI 产品 / 产品设计",
+          "description": "参与企业团队智能体平台建设。\n\n围绕 Team、Agent、Skill、Memory、Task 等核心对象，\n设计员工使用、管理者配置、Skill 管理、个人记忆、\n团队记忆、运行记录以及发布流程。",
+          "key_questions": [
+            "一个团队应该拥有怎样的 Agent？",
+            "个人 Memory 和团队 Memory 怎么划分？",
+            "Agent 自己选择 Skill 是否可靠？",
+            "Skill 之间发生冲突怎么办？",
+            "Agent 如何从聊天进入真正的任务执行？"
+          ],
+          "evidence": [
+            "参与 Team Agent V0 产品设计",
+            "参与个人 Memory / Team Memory 设计",
+            "参与 Skill 管理与 Agent 配置",
+            "参与 Web 管理端与飞书使用端设计"
+          ]
+        },
+        {
+          "name": "AI 需求流转",
+          "role": "AI 产品 / Agent Workflow",
+          "description": "设计统一 Requirement Agent，\n将业务人员在飞书中的自然语言反馈，\n转化为结构化 Requirement，并完成决策、建单和通知。",
+          "architecture": [
+            "Gateway",
+            "Requirement Agent",
+            "Parse Skill",
+            "InfoCheck Skill",
+            "Decision Skill",
+            "Action Skill",
+            "Requirement Store"
+          ],
+          "key_problems": [
+            "自然语言需求如何被准确识别",
+            "需求信息不足时如何补全",
+            "什么时候应该建 Issue",
+            "什么时候应该 Merge",
+            "什么时候应该 FAQ / Close",
+            "什么时候必须转 Human",
+            "如何避免 LLM 自己做危险决定"
+          ],
+          "product_principle": "LLM 负责理解和归纳，\n确定性规则负责边界、状态和执行。",
+          "evidence": [
+            "统一 Gateway + Requirement Agent 架构",
+            "Parse / InfoCheck / Decision / Action Skill 解耦",
+            "Decision 输出 Close / Merge / Human / Issue",
+            "建立可审计的 Decision 机制",
+            "设计异常、重试和安全降级"
+          ]
+        }
+      ],
+      "personal_takeaway": "蔚来这段经历对我最大的影响不是“做了 Agent”。\n\n而是让我开始真正意识到：\nAI 产品和传统软件产品的边界不一样。\n\n当模型开始参与判断和执行，\n产品经理需要开始理解 Memory、Skill、Context、Runtime、\nRule、Evaluation 这些东西。\n\n这也是我最近大量研究 Agent、Harness、Memory 和 Coding Agent 的原因。",
+      "visibility": "public"
+    },
+    {
+      "id": "xpeng-multimodal",
+      "organization": "小鹏汽车",
+      "role": "AI 多模态产品实习生",
+      "period": "2026.01 - 2026.03",
+      "status": "completed",
+      "positioning": "AI 多模态产品",
+      "one_liner": "第一次真正进入 AI 产品，也第一次发现模型问题最后往往是产品问题。",
+      "description": "参与智能座舱 AI 多模态产品，\n聚焦语音点餐场景中的识别、对话和业务协同。\n\n核心问题是：\n用户表达是非线性的，而系统执行路径往往是固定的。\n\n我的工作不是单纯调参数，\n而是通过 Badcase 归因、断点定位、策略设计和评测，\n找到用户与系统之间真正的摩擦点。",
+      "major_work": [
+        {
+          "name": "语音点餐多轮对话",
+          "description": "分析多轮 Session 中的识别、打断、意图和槽位问题。"
+        },
+        {
+          "name": "Badcase 归因",
+          "description": "对大量 Badcase 进行聚类归因，\n定位 ASR、决策、多意图跳脱等核心问题。"
+        },
+        {
+          "name": "VAD 动态策略",
+          "description": "针对用户思考性停顿导致的异常截断，\n优化 VAD 动态策略。"
+        },
+        {
+          "name": "多轮 Session",
+          "description": "参与多轮对话状态机与槽位填取逻辑设计。"
+        }
+      ],
+      "evidence": [
+        "多模态产品实习生",
+        "2026.01 - 2026.03",
+        "VAD 动态策略",
+        "多轮对话状态机",
+        "槽位填取逻辑",
+        "多轮 Session 成功率 69.78%"
+      ],
+      "personal_takeaway": "小鹏让我真正开始理解 AI 产品。\n\n我开始意识到，\nAI 产品的问题很少只是“模型好不好”。\n\n真正决定体验的，\n往往是模型、交互、状态机、业务流程和用户行为之间怎么连接。",
+      "visibility": "public"
+    }
+  ],
+  "projects": [
+    {
+      "id": "anti-fomo",
+      "name": "Anti-FOMO AI 趋势提炼工具",
+      "type": "AI Product / Vibecoding",
+      "period": "2026.01 - 2026.03",
+      "status": "completed",
+      "one_liner": "不追热点，而是帮你判断这个热点到底值不值得学。",
+      "background": "AI 行业信息更新速度极快，\n新名词、新模型、新技术不断出现。\n\n真正的问题不是“找不到信息”，\n而是人不知道哪些东西值得花时间理解。",
+      "product_idea": "不做传统关键词搜索，\n而是让 AI 从第一性原理出发，\n对一个 AI 趋势进行结构化判断。",
+      "key_design": [
+        "三维评估框架",
+        "红 / 黄 / 绿判断",
+        "自主搜索 Agent",
+        "实时状态反馈",
+        "减少单纯的信息堆积"
+      ],
+      "evidence": [
+        "通过结构化判断帮助用户理解 AI 趋势",
+        "用户理解本质时间提效约 5 倍",
+        "针对思维链高延迟设计实时状态替代单一进度"
+      ],
+      "personal_takeaway": "这个项目很像我做产品时的一个习惯：\n\n我不太喜欢把“信息更多”当成解决方案。\n更想知道真正的问题是什么，\n再决定 AI 应该参与哪一步。",
+      "visibility": "public"
+    },
+    {
+      "id": "x-bort",
+      "name": "X-bort 机器人基地",
+      "type": "创业 / 硬件 / 声学产品",
+      "period": "2025.07 - 2025.11",
+      "status": "incubated",
+      "one_liner": "第一次真正把“产品”从 idea 做到了融资。",
+      "background": "面向电竞玩家，\n解决“情绪释放”和“声音隐私”之间的冲突。\n\n产品方向是一款声学硬件。",
+      "role": "产品经理",
+      "responsibilities": [
+        "从 0 到 1 定义产品",
+        "市场与竞品调研",
+        "用户研究",
+        "PRD",
+        "商业逻辑拆解",
+        "路演",
+        "投资人沟通"
+      ],
+      "evidence": [
+        "深度调研用户 300+",
+        "创建并运营 100+ 天使用户社群",
+        "完成欧美电竞外设蓝海赛道调研",
+        "输出产品 PRD",
+        "负责商业逻辑拆解",
+        "主讲路演",
+        "获 50 万种子轮融资",
+        "获得“硬核造物奖”",
+        "项目进入孵化阶段",
+        "获得李泽湘教授及投资方关注",
+        "获《上游新闻》报道"
+      ],
+      "personal_takeaway": "这是我很重要的一段经历。\n\n因为它让我第一次真正意识到，\n产品不是写完 PRD 就结束。\n\n从用户需求，到硬件形态，到商业逻辑，\n再到融资和落地，每一步都必须面对真实世界。\n\n也让我更加确定：\n我喜欢做从 0 到 1 的东西。",
+      "visibility": "public"
+    },
+    {
+      "id": "hackathon",
+      "name": "Hackathon",
+      "type": "黑客松 / 快速原型",
+      "period": "",
+      "status": "completed",
+      "one_liner": "给自己很短的时间，把一个想法变成能跑的东西。",
+      "description": "参与黑客松类活动。\n\n对我来说黑客松最有意思的地方不是比赛，\n而是它迫使我快速完成：\nIdea → 产品定义 → Prototype → 实现 → Demo。",
+      "why_i_like_it": "我喜欢这种没有标准答案的环境。\n\n不需要先把所有东西想清楚，\n而是先做出来，再根据结果继续迭代。",
+      "visibility": "public"
+    },
+    {
+      "id": "life-git",
+      "name": "Life Git · 人生版本控制",
+      "type": "Independent Product",
+      "period": "2026.08 - 至今",
+      "status": "building",
+      "one_liner": "如果代码有 Git，那人生呢？",
+      "idea": "把自己的人生经历做成一个像 GitHub 一样可以持续更新的 Repository。\n\n项目、学习、实习、想法、选择和成长，\n都可以成为自己的 Commit。",
+      "interaction": {
+        "visual_style": "Pixel / Minecraft-like",
+        "interaction_model": "GitHub / Git",
+        "core_objects": [
+          "Repository",
+          "Commit",
+          "Project",
+          "Milestone",
+          "Version",
+          "README"
+        ]
+      },
+      "why_i_make_it": "我觉得普通简历只能告诉别人“我做过什么”。\n\n但一个持续更新的 Life Git，\n可以记录“我是怎么一步一步变成现在这个人的”。",
+      "personal_meaning": "这是一个很像我的项目。\n\n一个有点奇怪的想法，\n想到了就不满足于只讨论，\n直接把它做出来。",
+      "technologies": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Git",
+        "AI"
+      ],
+      "github": "https://github.com/tulip627722-byte",
+      "visibility": "public"
+    }
+  ],
+  "technical_background": {
+    "hardware": {
+      "title": "Hardware",
+      "description": "智能制造专业背景，接触硬件、嵌入式和底层系统。",
+      "keywords": [
+        "Embedded",
+        "Hardware",
+        "Intelligent Manufacturing"
+      ]
+    },
+    "ai": {
+      "title": "AI",
+      "description": "从 AI 多模态产品进入 AI，\n逐渐深入 LLM、Agent、Memory、Skill、Harness 和 AI Coding。",
+      "keywords": [
+        "LLM",
+        "Multimodal",
+        "Voice AI",
+        "Agent",
+        "Memory",
+        "Skill",
+        "Harness",
+        "Coding Agent"
+      ]
+    },
+    "product": {
+      "title": "Product",
+      "description": "能够从用户问题、业务问题出发，\n一路做到产品定义、交互设计、策略设计、评测和落地。",
+      "keywords": [
+        "AI Product",
+        "Product Design",
+        "User Research",
+        "Evaluation",
+        "0-to-1"
+      ]
+    },
+    "making": {
+      "title": "Making",
+      "description": "喜欢自己做 Prototype。\n\n黑客松、创业、Vibecoding 和个人项目，\n都是我把想法变成东西的方式。",
+      "keywords": [
+        "Hackathon",
+        "Startup",
+        "Vibecoding",
+        "Prototype"
+      ]
+    }
+  },
+  "skills": [
+    {
+      "category": "AI",
+      "items": [
+        "AI 产品",
+        "LLM",
+        "Agent",
+        "AI 多模态",
+        "Voice AI",
+        "AI Evaluation",
+        "Memory",
+        "Skill",
+        "Harness",
+        "Coding Agent"
+      ]
+    },
+    {
+      "category": "Product",
+      "items": [
+        "产品设计",
+        "需求分析",
+        "用户研究",
+        "PRD",
+        "AI 产品设计",
+        "产品评测",
+        "0-1 产品",
+        "商业逻辑"
+      ]
+    },
+    {
+      "category": "Engineering",
+      "items": [
+        "Python",
+        "Git",
+        "GitHub",
+        "React",
+        "TypeScript",
+        "Next.js",
+        "嵌入式",
+        "硬件"
+      ]
+    },
+    {
+      "category": "Tools",
+      "items": [
+        "Claude",
+        "GPT",
+        "Gemini",
+        "Dify",
+        "Vibecoding",
+        "GitLab",
+        "Feishu"
+      ]
+    }
+  ],
+  "life_commits": [
+    {
+      "date": "2024.09",
+      "type": "milestone",
+      "title": "进入智能制造",
+      "description": "开始学习硬件、嵌入式和智能制造。\n这是我理解机器的起点。",
+      "tags": [
+        "Hardware",
+        "Embedded",
+        "Intelligent Manufacturing"
+      ]
+    },
+    {
+      "date": "2025.07",
+      "type": "startup",
+      "title": "开始 X-bort 创业",
+      "description": "开始做声学硬件创业项目。\n第一次真正经历用户研究、产品定义、商业逻辑、路演和融资。",
+      "tags": [
+        "Startup",
+        "Hardware",
+        "Product"
+      ]
+    },
+    {
+      "date": "2025.11",
+      "type": "milestone",
+      "title": "X-bort 进入孵化",
+      "description": "项目获得 50 万种子轮融资并获得硬核造物奖。",
+      "tags": [
+        "Startup",
+        "Fundraising",
+        "Hardware"
+      ]
+    },
+    {
+      "date": "2026.01",
+      "type": "work",
+      "title": "进入 AI 多模态产品",
+      "description": "在小鹏参与智能座舱 AI 多模态产品。\n开始真正面对模型、用户、交互和业务之间的复杂问题。",
+      "tags": [
+        "AI",
+        "Multimodal",
+        "Smart Car"
+      ]
+    },
+    {
+      "date": "2026.01",
+      "type": "build",
+      "title": "开始做 Anti-FOMO",
+      "description": "用 Vibecoding 做 AI 趋势提炼工具。\n第一次更明显地体验到：\nAI 本身也可以成为产品的核心工作方式。",
+      "tags": [
+        "AI",
+        "Vibecoding",
+        "Product"
+      ]
+    },
+    {
+      "date": "2026.03",
+      "type": "milestone",
+      "title": "完成小鹏 AI 多模态产品实践",
+      "description": "完成一段真正的 AI 产品实践。\n开始形成自己对 AI 产品问题的归因和评测方法。",
+      "tags": [
+        "AI Product",
+        "Evaluation"
+      ]
+    },
+    {
+      "date": "2026.07",
+      "type": "work",
+      "title": "开始深入 Agent",
+      "description": "进入蔚来后，开始从 AI 产品进一步深入 Agent。\n开始研究 Memory、Skill、Task、Workflow 和 Harness。",
+      "tags": [
+        "Agent",
+        "Memory",
+        "Skill"
+      ]
+    },
+    {
+      "date": "2026.07",
+      "type": "build",
+      "title": "开始做 AI 需求流转",
+      "description": "设计 Requirement Agent，\n将自然语言需求转化为结构化 Requirement、Decision 和 Issue。",
+      "tags": [
+        "Agent",
+        "Workflow",
+        "Automation"
+      ]
+    },
+    {
+      "date": "2026.08",
+      "type": "learning",
+      "title": "开始拆 Agent",
+      "description": "不再只关注 Agent 怎么用，\n开始研究 Agent 为什么能够稳定完成任务。\n持续关注 Memory、Skill、Harness、Coding Agent 等机制。",
+      "tags": [
+        "Agent",
+        "Harness",
+        "Coding Agent"
+      ]
+    },
+    {
+      "date": "2026.08",
+      "type": "build",
+      "title": "开始 Life Git",
+      "description": "突然觉得普通简历太无聊。\n如果人生也可以像 Git 一样记录版本，会是什么样？\n于是开始自己做。",
+      "tags": [
+        "Life Git",
+        "Personal Product",
+        "Building"
+      ]
+    }
+  ],
+  "interests": {
+    "technology": [
+      "AI",
+      "Agent",
+      "LLM",
+      "AI Coding",
+      "多模态",
+      "硬件",
+      "嵌入式",
+      "机器人",
+      "新技术"
+    ],
+    "product": [
+      "AI-native Product",
+      "Human-AI Interaction",
+      "0-to-1",
+      "产品创新",
+      "创业"
+    ],
+    "making": [
+      "Hackathon",
+      "Vibecoding",
+      "Prototype",
+      "个人产品"
+    ],
+    "questions": [
+      "模型为什么会这样做？",
+      "Agent 为什么会失败？",
+      "哪些东西应该交给模型，哪些应该交给代码？",
+      "一个新技术到底值不值得学？",
+      "一个有意思的 idea 到底能不能做出来？",
+      "AI 最终应该怎么变成真正有用的产品？"
+    ]
+  },
+  "readme": {
+    "title": "Hi, I'm Tulip.",
+    "opening": "会拆机器，也会拆模型；\n更喜欢把它们做成东西。",
+    "body": "我是智能制造专业学生。\n\n最开始，我学的是硬件、嵌入式和机器。\n后来一路折腾到了 AI、多模态产品和 Agent。\n\n我好像一直没有特别明确地决定自己“应该是什么”。\n\n比起沿着一条固定的路线走到底，\n我更喜欢遇到一个觉得有意思的问题，\n然后把它拆开、研究、做出来。\n\n所以我可能会研究硬件，\n也可能研究大模型。\n\n会写 PRD，\n也会自己做 Prototype。\n\n会做 AI 产品，\n也会拆 Agent。\n\n会去大厂实习，\n也会跑去创业、参加黑客松。\n\n我喜欢技术，\n但最终更喜欢的是“做东西”。",
+    "experience_story": "小鹏是我进入 AI 产品的一次重要转折。\n\n在智能座舱 AI 多模态产品里，\n我开始真正面对一个问题：\n\n用户说出来的话是混乱的、跳跃的、非线性的，\n但机器背后的执行路径却往往是固定的。\n\n我开始通过 Badcase 归因、\n断点定位、策略设计和评测，\n去理解 AI 产品为什么会失败。\n\n后来到了蔚来，\n我开始继续往下走。\n\n从“怎么把一个 AI 产品做好”，\n到“Agent 到底应该怎么工作”。\n\n我开始研究 Memory、Skill、Task、Workflow、\nHarness 和 Coding Agent。\n\n这时候我发现，\nAI 产品真正有意思的地方，\n可能不只是模型本身，\n而是模型怎么和产品、工具、规则、上下文以及真实工作连接起来。",
+    "hardware_story": "但我也不想因为现在做 AI，\n就把硬件和嵌入式那一部分的自己丢掉。\n\n智能制造是我最早理解机器的入口。\n\nX-bort 则让我第一次真正把硬件、\n用户需求、产品和商业放在一起。\n\n那时候面对的不是一个模型效果问题，\n而是一个真实的产品问题：\n\n用户到底有没有这个需求？\n产品应该长什么样？\n为什么愿意买？\n能不能做出来？\n有没有人愿意投钱？\n\n这段经历让我发现，\n我其实很喜欢这种从 0 到 1 的过程。",
+    "builder_story": "黑客松、Vibecoding 和 Life Git，\n是我另外一面。\n\n我很容易对一些奇怪的 idea 产生兴趣。\n\n如果只是讨论，我可能很快就忘了。\n\n但如果真的觉得有意思，\n我就会想：\n\n能不能直接做一个？\n\n所以我喜欢 Hackathon，\n喜欢 Vibecoding，\n也喜欢自己做一些看起来“不一定有用”的东西。\n\nLife Git 就是最近的一个例子。\n\n我突然觉得：\n如果代码可以用 Git 记录版本，\n那人生呢？\n\n然后我就开始做了。",
+    "current_state": "现在的我，正在越来越靠近 AI。\n\n但我不想把自己定义成“Agent 产品经理”。\n\nAgent 是我现在正在深入的一条技术和产品方向，\n但不是我的边界。\n\n我依然对硬件、嵌入式、AI 多模态、\n产品、创业、黑客松和各种新技术感兴趣。\n\n我也不知道最后会走到哪里。\n\n但我希望自己一直保持一件事情：\n\n看到有意思的问题，\n就去把它拆开。\n\n觉得有意思的东西，\n就去做出来。",
+    "personal_statement": "我不太确定自己最后会成为什么。\n\n可能继续做 AI 产品，\n可能去做 Agent，\n可能重新回到硬件，\n也可能跑去做一个完全没想过的东西。\n\n但我希望自己不要太早被一个标签定义。\n\n因为现在看来，\n我最喜欢的事情一直没有变：\n\n理解一个新东西，\n把它拆开，\n然后亲手做出来。"
+  },
+  "featured": [
+    {
+      "type": "experience",
+      "id": "nio-agent"
+    },
+    {
+      "type": "experience",
+      "id": "xpeng-multimodal"
+    },
+    {
+      "type": "project",
+      "id": "x-bort"
+    },
+    {
+      "type": "project",
+      "id": "anti-fomo"
+    },
+    {
+      "type": "project",
+      "id": "life-git"
+    },
+    {
+      "type": "project",
+      "id": "hackathon"
+    }
+  ],
+  "philosophy": {
+    "avoid_labels": [
+      "纯 AI 产品经理",
+      "Agent 产品经理",
+      "纯技术",
+      "纯硬件",
+      "纯创业者"
+    ],
+    "preferred_description": "技术背景的 AI 产品人 / Builder。",
+    "core_contradiction": "硬件 × AI\n工程 × 产品\n大厂 × 创业\n模型 × 用户\n想法 × 落地",
+    "core_sentence": "我不太想决定自己应该成为什么，\n我更想不断去做那些让我觉得有意思的东西。",
+    "final_tagline": "From hardware to AI.\nFrom ideas to things."
+  },
+  "import_options": {
+    "default_visibility": "private",
+    "replace_existing_profile": false,
+    "publish_automatically": false,
+    "preserve_timeline": true,
+    "preserve_project_order": true
+  }
+}
