@@ -7,3 +7,7 @@ dist/
 *.log
 qa/*.png
 qa/upload-demo.js
+
+# Cloudflare Wrangler
+.dev.vars
+.wrangler/
