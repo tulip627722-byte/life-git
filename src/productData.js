@@ -1,6 +1,6 @@
 import { IMPORTED_PROFILE, IMPORTED_PROJECTS, IMPORTED_README_MARKDOWN } from "./profileAdapter";
 
-export const projectStorageKey = "life-git.projects.zh-cn.v4";
+export const projectStorageKey = "life-git.projects.zh-cn.v5";
 export const readmeStorageKey = "life-git.profile-readme.zh-cn.v5";
 // Visitors are the safe default for a fresh/local preview; Tulip can enter management mode explicitly.
 export const ownerStorageKey = "life-git.owner-demo.zh-cn.v2";
@@ -76,8 +76,8 @@ const GITHUB_PROJECTS = [
       { src: "/assets/bmo-hackathon-device.jpg", alt: "Adventure X 黑客松现场的 BMO 实体原型", caption: "现场原型：把语音、屏幕和实体按键放进一个可交互的 BMO 外壳。" },
       { src: "/assets/bmo-hackathon-character.jpg", alt: "BMO 概念形象", caption: "概念形象：用熟悉而有情绪的角色感，降低人与 Agent 第一次互动的距离。" },
     ],
-    coverImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "智能体设备交互界面",
+    coverImage: "/assets/bmo-hackathon-device.jpg",
+    coverAlt: "Adventure X 黑客松现场的 BMO 实体原型",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/advx-bmo`, repoFullName: `${githubOwner}/advx-bmo`, defaultBranch: "main", headSha: "ac2c249", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-07-25T10:19:23Z",
     technologies: ["C", "LVGL", "IoT", "Agent"], readme: readmes.bmo,
     files: [
@@ -93,8 +93,8 @@ const GITHUB_PROJECTS = [
     description: "用第一性原理判断 AI 技术是否值得投入学习，减少名词膨胀与热点焦虑。",
     summary: "我常被技术热点刷屏，项目最核心的价值是：把“是否值得学”拆成可复用判断框架，避免盲目跟风。",
     highlights: ["先判断需求价值再决定学习深度", "结合市场、成本和风险给出建议", "产出清晰的“继续/暂停/观察”决策结果"],
-    coverImage: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "AI 讨论与决策画面",
+    coverImage: "/assets/cover-anti-fomo.jpg",
+    coverAlt: "在热点气泡的岔路口，用指南针判断方向",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/Anti-fomo`, repoFullName: `${githubOwner}/Anti-fomo`, defaultBranch: "main", headSha: "caef0a3", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-05-12T14:11:48Z",
     technologies: ["Next.js", "TypeScript", "AI", "SQLite"], readme: readmes.antiFomo,
     files: [
@@ -110,8 +110,8 @@ const GITHUB_PROJECTS = [
     description: "按清醒、省钱与健身目标进行多平台咖啡比价，并生成可解释的 AI 购买建议。",
     summary: "这个项目把“挑咖啡”变成可量化的决策。不是只给你一个推荐，而是给出不同目标下的选择逻辑。",
     highlights: ["三种目标模式：清醒、预算、健康", "多平台价格对比与透明逻辑", "可解释输出：为什么这个选择更适配你"],
-    coverImage: "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "咖啡杯与决策界面",
+    coverImage: "/assets/cover-coffee.jpg",
+    coverAlt: "咖啡杯、比价天平与三种目标模式",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/Coffee-Decision`, repoFullName: `${githubOwner}/Coffee-Decision`, defaultBranch: "main", headSha: "eed4ef7", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-06-04T08:59:36Z",
     technologies: ["React", "TypeScript", "Gemini", "Vite"], readme: readmes.coffee,
     files: [
@@ -127,8 +127,8 @@ const GITHUB_PROJECTS = [
     description: "把提示词拆成结构、约束与目标，再辅助分析和迭代优化的交互工具。",
     summary: "把提示词当作“产品需求文档”来处理：先定位目标，再拆解上下文、约束和预期，避免一次成型才发现效果不稳定。",
     highlights: ["结构化拆解提示词", "给出可执行优化建议", "沉淀可复用提示词模板"],
-    coverImage: "https://images.unsplash.com/photo-1516116216624-53e697fedbe0?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "提示词和对话交互界面",
+    coverImage: "/assets/cover-prompt.jpg",
+    coverAlt: "对话气泡被拆解成结构化积木",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/Prompt-reverse`, repoFullName: `${githubOwner}/Prompt-reverse`, defaultBranch: "main", headSha: "494a6be", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-06-14T09:27:40Z",
     technologies: ["React", "TypeScript", "Gemini", "Prompt"], readme: readmes.promptReverse,
     files: [
@@ -144,8 +144,8 @@ const GITHUB_PROJECTS = [
     description: "课程与实践档案：Kinect v2 RGB-D 采集、绿植三维重建、Python 工具及大学学习记录。",
     summary: "把大学项目做成“可复用方法库”：从传感器采集、重建算法到展示流程，记录了从问题定义到实验迭代的全链路。",
     highlights: ["Kinect RGB-D 数据采集与配准流程", "绿植三维重建可视化", "课程实践与交付文档汇总"],
-    coverImage: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "3D 重建实验数据可视化",
+    coverImage: "/assets/cover-college.jpg",
+    coverAlt: "深度相机扫描绿植并重建为点云网格",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/my-college-work`, repoFullName: `${githubOwner}/my-college-work`, defaultBranch: "master", headSha: "b6c313a", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-06-13T09:14:09Z",
     technologies: ["Python", "Kinect", "RGB-D", "3D"], readme: readmes.college,
     files: [
@@ -161,8 +161,8 @@ const GITHUB_PROJECTS = [
     description: "个人产品与学习方向的待整理仓库；GitHub 当前为空，保留为下一阶段入口。",
     summary: "这个仓库是我后续放置“长期跟进主题”的主入口，当前先保留结构，等下一批内容整理好后再逐步上线。",
     highlights: ["产品观察与学习方向归档", "每季度更新学习计划", "后续对外展示可直接从这里扩展"],
-    coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "个人成长与学习路线规划",
+    coverImage: "/assets/cover-pd.jpg",
+    coverAlt: "笔记本上的成长路径与远方旗帜",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/Personal-following-pd`, repoFullName: `${githubOwner}/Personal-following-pd`, defaultBranch: "main", headSha: "empty", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-06-13T10:23:52Z",
     technologies: ["Product", "Planning"], readme: "# Personal Following PD\n\n这个公开仓库当前为空。", files: [],
   },
@@ -171,8 +171,8 @@ const GITHUB_PROJECTS = [
     description: "将 GitHub 项目、提交记录和个人主页做成长期维护的作品展示系统，支持生命周期可追踪。",
     summary: "这是当前网站本身的构想：让创作记录、项目里程碑和公开展示连成同一条可持续更新的生命线。",
     highlights: ["项目摘要驱动展示，不依赖一次性搬运仓库", "可持续更新：新内容可直接归档到主页", "访客端和管理端逻辑分离，便于长期维护"],
-    coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
-    coverAlt: "持续迭代中的作品主页",
+    coverImage: "/assets/life-landscape.png",
+    coverAlt: "像素山水：持续生长的作品生命线",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/life-git`, repoFullName: `${githubOwner}/life-git`, defaultBranch: "main", headSha: "0000000", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-09-01T08:00:00Z",
     technologies: ["React", "Cloudflare Workers", "D1", "R2", "GitHub API"], readme: readmes.lifeGit,
     files: [
@@ -182,11 +182,16 @@ const GITHUB_PROJECTS = [
   },
 ];
 
+// 资料导入项目（tulip-profile.json）没有封面字段，在这里按 slug 补充主题配图
+const PROFILE_COVERS = {
+  "x-bort": { coverImage: "/assets/cover-x-bort.jpg", coverAlt: "X-bort 桌面陪伴机器人原型与设计草图" },
+};
+
 const importedSlugs = new Set(IMPORTED_PROJECTS.map((project) => project.slug));
 export const INITIAL_PROJECTS = [
   ...IMPORTED_PROJECTS.map((project) => {
     const repository = GITHUB_PROJECTS.find((item) => item.slug === project.slug);
-    return repository ? { ...repository, ...project, id: repository.id, sourceType: repository.sourceType, githubUrl: repository.githubUrl, repoFullName: repository.repoFullName, defaultBranch: repository.defaultBranch, headSha: repository.headSha, syncStatus: repository.syncStatus, lastSyncedAt: repository.lastSyncedAt, technologies: [...new Set([...repository.technologies, ...project.technologies])], files: repository.files } : project;
+    return repository ? { ...repository, ...project, id: repository.id, sourceType: repository.sourceType, githubUrl: repository.githubUrl, repoFullName: repository.repoFullName, defaultBranch: repository.defaultBranch, headSha: repository.headSha, syncStatus: repository.syncStatus, lastSyncedAt: repository.lastSyncedAt, technologies: [...new Set([...repository.technologies, ...project.technologies])], files: repository.files } : { ...project, ...(PROFILE_COVERS[project.slug] || {}) };
   }),
   ...GITHUB_PROJECTS.filter((project) => !importedSlugs.has(project.slug)),
 ];
