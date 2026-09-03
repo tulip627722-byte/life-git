@@ -101,7 +101,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .pixel-button:active { transform: translate(5px, 6px); box-shadow: inset 0 0 0 2px #f3b5a6, 1px 1px 0 var(--ink); }
 .pixel-button.small { min-width: 154px; min-height: 52px; font-size: 20px; box-shadow: inset 0 0 0 2px #f3b5a6, 4px 4px 0 var(--ink); }
 .pixel-button:disabled { opacity: .7; cursor: wait; }
-
 .contribution-panel { position: relative; min-height: 222px; border: 1px solid var(--ink); padding: 20px 22px 18px; background: rgba(255, 255, 255, .16); box-shadow: 2px 2px 0 rgba(69, 62, 48, .2); }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .panel-heading h2, .section-toolbar h2 { margin: 0; font-family: "Pixelify Sans", "ZCOOL QingKe HuangYou", "PingFang SC", monospace; font-size: 21px; letter-spacing: .04em; }
@@ -533,6 +532,136 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .resume-highlight-grid article > span { color: var(--red); font-size: 10px; }
 .resume-highlight-grid h3 { margin: 12px 0 10px; color: var(--black); font-family: "Pixelify Sans", "ZCOOL QingKe HuangYou", "PingFang SC", monospace; font-size: 21px; line-height: 1.25; }
 .resume-source-note { display: flex; align-items: center; gap: 9px; margin-top: 30px; padding: 14px 16px; border-left: 4px solid var(--ink); background: #e2e8dc; color: var(--ink-soft); font-size: 11px; }
+.resume-page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.share-button { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid var(--line); background: #f4f0e5; color: var(--ink); font-family: inherit; font-size: 11px; cursor: pointer; }
+.share-button:hover { border-color: var(--ink); background: #e2e8dc; }
+.project-share-row { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+
+.project-context { margin: 0 0 16px; padding: 18px 20px; border: 1px solid var(--ink); background: #e8eee1; box-shadow: 4px 4px 0 #c3bdaf; }
+.project-context-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px dashed var(--line); padding-bottom: 12px; }
+.project-context-heading span, .project-gallery header span { color: var(--red); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.project-context h2, .project-gallery h2 { margin: 5px 0 0; color: var(--black); font-family: "Pixelify Sans", "ZCOOL QingKe HuangYou", "PingFang SC", monospace; font-size: 24px; }
+.project-context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0 12px; }
+.project-context-grid div { display: flex; flex-direction: column; gap: 5px; }
+.project-context-grid span { color: var(--ink-soft); font-size: 10px; }
+.project-context-grid strong { color: var(--black); font-size: 13px; }
+.project-context > p { max-width: 760px; margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.75; }
+
+.project-detail-summary {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.18);
+  margin-bottom: 16px;
+}
+
+.project-detail-cover {
+  min-height: 190px;
+  border: 1px solid var(--line);
+  padding: 8px;
+  background: #fffaf0;
+  display: grid;
+  place-items: center;
+}
+
+.project-detail-cover img {
+  width: 100%;
+  height: 100%;
+  min-height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.project-detail-meta {
+  margin: 6px 0 12px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.project-detail-highlights,
+.project-tags {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-detail-highlights li,
+.project-tags span {
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  background: #ebefdf;
+  font-size: 11px;
+}
+
+.project-case-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.project-case-actions code {
+  font-size: 11px;
+  color: var(--red-dark);
+}
+
+.project-gallery { margin: 22px 0; padding: 20px; border: 1px solid var(--ink); background: #f4f0e5; }
+.project-gallery > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+.project-gallery > header p { max-width: 270px; margin: 0; color: var(--ink-soft); font-size: 11px; line-height: 1.6; text-align: right; }
+.project-gallery-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 12px; }
+.project-gallery figure { margin: 0; border: 1px solid var(--line); background: #fffdf7; }
+.project-gallery img { display: block; width: 100%; height: 300px; object-fit: cover; }
+.project-gallery figure:first-child img { object-position: center 58%; }
+.project-gallery figcaption { padding: 10px 11px 12px; color: var(--ink-soft); font-size: 11px; line-height: 1.6; }
+
+.project-detail-section {
+  padding: 16px;
+  border: 1px dashed var(--line);
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.project-detail-section h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.project-detail-section p { margin: 0; color: var(--ink-soft); line-height: 1.65; font-size: 12px; }
+
+.project-case-study { margin: 22px 0; padding: 22px; border: 1px solid var(--ink); background: #f4f0e5; box-shadow: 4px 4px 0 #c3bdaf; }
+.project-case-study > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); }
+.project-case-study > header > div > span { color: var(--red); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.project-case-study h2 { margin: 5px 0 0; color: var(--black); font-family: "Pixelify Sans", "ZCOOL QingKe HuangYou", "PingFang SC", monospace; font-size: 25px; }
+.case-study-lead { padding: 17px 0 4px; }
+.case-study-lead strong { color: var(--black); font-size: 15px; }
+.case-study-lead p { margin: 8px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.7; white-space: pre-line; }
+.case-study-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.case-study-grid article { padding: 14px; border: 1px dashed var(--line); background: rgba(231,235,220,.45); }
+.case-study-grid article > span { display: block; margin-bottom: 7px; color: var(--red-dark); font-size: 10px; }
+.case-study-grid strong, .case-study-grid p, .case-study-grid li { color: var(--ink-soft); font-size: 11px; line-height: 1.65; }
+.case-study-grid p { margin: 0; white-space: pre-line; }
+.case-study-grid ul { margin: 0; padding-left: 17px; }
+.evidence-strip { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; padding: 12px; background: #e2e8dc; }
+.evidence-strip > span { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); font-size: 10px; white-space: nowrap; }
+.evidence-strip > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.evidence-strip code { padding: 4px 6px; background: #f4f0e5; color: var(--ink-soft); font-size: 10px; }
+.project-case-study > blockquote { margin: 14px 0 0; padding: 12px 15px; border-left: 3px solid var(--red); color: var(--ink-soft); font-size: 11px; line-height: 1.7; white-space: pre-line; }
+.project-case-study > footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 15px; color: var(--ink-soft); font-size: 10px; }
+.public-contact-section > p { color: var(--ink-soft); font-size: 12px; line-height: 1.7; }
+.contact-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 13px; }
+.contact-links a, .contact-placeholder { display: inline-flex; align-items: center; gap: 8px; padding: 11px 13px; border: 1px solid var(--line); background: rgba(255,255,255,.17); color: var(--ink); font-size: 11px; text-decoration: none; }
+.contact-links a:hover { border-color: var(--ink); background: #e2e8dc; }
+.contact-placeholder { color: var(--ink-soft); border-style: dashed; }
 .imported-profile-hero blockquote { margin: 12px 0 16px; padding-left: 13px; border-left: 4px solid var(--red); color: var(--black); font-family: "Pixelify Sans", "ZCOOL QingKe HuangYou", "PingFang SC", monospace; font-size: 18px; }
 .imported-profile-hero p { white-space: pre-line; }
 .profile-trait-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
@@ -584,6 +713,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .resume-skill-cloud { padding: 15px 0 0; border-left: 0; border-top: 1px dashed var(--line); }
   .resume-highlight-grid { grid-template-columns: 1fr; }
   .profile-trait-grid, .technical-background-grid { grid-template-columns: repeat(2, 1fr); }
+  .case-study-grid { grid-template-columns: 1fr; }
+  .project-detail-summary { grid-template-columns: 1fr; }
+  .project-case-actions { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 700px) {
   .profile-readme-strip { align-items: flex-start; flex-direction: column; }
@@ -614,4 +746,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .education-card header, .experience-list article header { flex-direction: column; gap: 8px; }
   .resume-hero, .education-card, .experience-list article { padding: 16px; }
   .profile-trait-grid, .technical-background-grid, .skill-group-grid, .experience-projects { grid-template-columns: 1fr; }
+  .project-case-study > header, .project-case-study > footer, .project-gallery > header { flex-direction: column; align-items: flex-start; }
+  .project-context-heading { flex-direction: column; align-items: flex-start; }
+  .project-context-grid, .project-gallery-grid { grid-template-columns: 1fr; }
+  .project-gallery > header p { max-width: none; text-align: left; }
+  .project-gallery img { height: 270px; }
+  .evidence-strip { flex-direction: column; }
 }

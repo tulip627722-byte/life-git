@@ -27,7 +27,7 @@ export const RELEASES = [
   { version: "v1.0.0", title: "高中", range: "2021 — 2024", releasedOn: "2024 年 6 月 10 日", commits: 28, activeDays: 109, changes: ["发现对产品的热爱", "完成第一个 Side Project", "选择新的方向"], notes: "在这个版本里，好奇心第一次变成了方向。" },
 ];
 
-export const storageKey = "life-git-demo.commits.zh-cn.v3";
+export const storageKey = "life-git-demo.commits.zh-cn.v4";
 
 export function makeCommitId() {
   const values = new Uint32Array(2);

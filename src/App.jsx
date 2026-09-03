@@ -4,15 +4,15 @@ import {
   CalendarBlank, Check, Code, CornersOut, Database, DownloadSimple, Eye, EyeSlash,
   File, FileCode, FileImage, FileText, FolderOpen, FolderSimple, Gear, GithubLogo,
   GitBranch, GitCommit, GraduationCap, Image, Lightbulb, Lock, MagicWand, PencilSimple,
-  Plus, ShieldCheck, Sparkle, SquaresFour, Tag, TreeEvergreen, UploadSimple, UserCircle,
+  Plus, ShareNetwork, ShieldCheck, Sparkle, SquaresFour, Tag, TreeEvergreen, UploadSimple, UserCircle,
   X,
 } from "@phosphor-icons/react";
 import { COMMIT_TYPES, INITIAL_COMMITS, RELEASES, makeCommitId, sortCommits, storageKey } from "./data.js";
 import {
   INITIAL_PROJECTS, INITIAL_README_STATE, RESUME_PROFILE, makeId, ownerStorageKey, projectStorageKey,
-  readmeStorageKey, slugify, sortFiles,
+  readmeStorageKey, slugify,
 } from "./productData.js";
-import { apiRequest, hydrateRemoteFile, importPublicGithubRepository, prepareLocalUploads } from "./api.js";
+import { apiRequest, importPublicGithubRepository } from "./api.js";
 
 const topRoutes = [
   { path: "/", label: "概览", icon: SquaresFour },
@@ -46,6 +46,109 @@ function formatBytes(value = 0) {
   if (value < 1024) return `${value} B`;
   if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
   return `${(value / 1024 / 1024).toFixed(1)} MB`;
+}
+function normalizeText(value = "") {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+function dedupe(items = []) {
+  const seen = new Set();
+  return items
+    .map((item) => normalizeText(item))
+    .filter((item) => item && (seen.has(item.toLowerCase()) ? false : (seen.add(item.toLowerCase()), true)));
+}
+function cleanMarkdownLine(line = "") {
+  return line
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+    .replace(/\[(.+?)\]\([^)]+\)/g, "$1")
+    .replace(/[#>*_~]/g, "")
+    .replace(/^\s*[-*+]\s+/, "")
+    .trim();
+}
+function inferSummaryFromProfile(profile = {}) {
+  const bullets = dedupe([
+    ...(profile.responsibilities || []),
+    ...(profile.key_design || []),
+    ...(profile.interaction?.core_objects || []),
+    ...(profile.evidence || []),
+  ]).slice(0, 5);
+  const summary = normalizeText(profile.one_liner || profile.background || profile.description || profile.idea);
+  return { summary, highlights: bullets };
+}
+function inferSummaryFromReadme(readme = "") {
+  const lines = String(readme).replace(/\r/g, "").split("\n").map((item) => item.trim());
+  const summary = lines
+    .map(cleanMarkdownLine)
+    .find((line) => line.length > 20 && !line.startsWith("#") && !line.startsWith(">"));
+  const highlights = dedupe(lines.flatMap((line) => {
+    const list = line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);
+    if (!list) return [];
+    const text = cleanMarkdownLine(list[1]);
+    return text ? [text] : [];
+  })).slice(0, 5);
+  return { summary: summary || "", highlights };
+}
+function inferSummaryFromFiles(files = []) {
+  const safeFiles = Array.isArray(files) ? files.filter((file) => file && file.path) : [];
+  if (!safeFiles.length) return { summary: "", highlights: [] };
+
+  const parseCodeSignals = (file) => {
+    if (!file.content || file.kind !== "code") return [];
+    const lines = String(file.content).replace(/\r/g, "").split("\n").map((line) => normalizeText(line));
+    const signalCandidates = lines
+      .slice(0, 80)
+      .map((line) => {
+        const match = line.match(/^(?:export\s+)?(?:async\s+)?(?:function)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/i)
+          || line.match(/^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:async\s*)?(?:function|\()/i)
+          || line.match(/^class\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/i)
+          || line.match(/^def\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/i);
+        if (!match) return null;
+        return `${match[1]}(${file.path})`;
+      })
+      .filter(Boolean);
+    return signalCandidates.slice(0, 2);
+  };
+
+  const kinds = safeFiles.reduce((memo, file) => {
+    memo[file.kind] = (memo[file.kind] || 0) + 1;
+    return memo;
+  }, {});
+  const languages = dedupe(safeFiles.map((file) => file.language).filter(Boolean));
+  const keyEntries = safeFiles
+    .filter((file) => /(^|\/)(index|app|main|server|worker|src|lib|api|components?)\.(jsx?|tsx?|py|go|js|ts)$/i.test(file.path))
+    .slice(0, 3)
+    .map((file) => file.path.split("/").pop());
+  const codeSignals = safeFiles.filter((file) => file.kind === "code").flatMap(parseCodeSignals).slice(0, 4);
+  const highlights = dedupe([
+    safeFiles.length ? `该项目可见文件共 ${safeFiles.length} 个` : "",
+    kinds.code ? `代码文件 ${kinds.code} 个` : "",
+    kinds.markdown ? `文档文件 ${kinds.markdown} 个` : "",
+    kinds.image ? `图片 ${kinds.image} 张` : "",
+    languages.length ? `技术线索：${languages.slice(0, 3).join("、")}` : "",
+    ...codeSignals.map((signal) => `代码结构线索：${signal}`),
+    keyEntries.length ? `主要入口：${keyEntries.join("、")}` : "",
+  ]).slice(0, 5);
+  const languageText = languages.length ? `技术栈 ${languages.slice(0, 3).join("、")}` : "";
+  const summary = languageText || `${safeFiles.length} 个文件构成的项目`;
+  return { summary, highlights };
+}
+function deriveProjectDigest(project = {}) {
+  const profileDigest = inferSummaryFromProfile(project.profileData || {});
+  const readmeDigest = inferSummaryFromReadme(project.readme || project.description || "");
+  const fileDigest = inferSummaryFromFiles(project.files || []);
+  const summary = normalizeText(
+    project.summary || profileDigest.summary || readmeDigest.summary || fileDigest.summary
+  ) || "该项目正在持续补充中，核心目标与成果将持续更新。";
+  const highlights = dedupe(project.highlights?.length ? project.highlights : [
+    ...(profileDigest.highlights || []),
+    ...(readmeDigest.highlights || []),
+    ...(fileDigest.highlights || []),
+  ]).slice(0, 5);
+  const coverImage = project.coverImage || project.files?.find((file) => file.kind === "image")?.previewUrl;
+  return { ...project, summary, highlights, coverImage };
+}
+function buildProjectDigest(projects = []) {
+  return Array.isArray(projects) ? projects.filter((project) => !["prompt-notes", "hackathon"].includes(project?.slug)).map(deriveProjectDigest) : projects;
 }
 function currentRoute() {
   const legacy = window.location.hash.replace("#", "");
@@ -94,11 +197,11 @@ function Sidebar({ ownerMode, publicProjectCount }) {
       <button className="readme-title readme-button" type="button" onClick={() => navigate(ownerMode ? "/admin/readme" : "/readme")}><FileText size={17} /> /README.md <ArrowRight size={15} /></button><div className="sidebar-rule" />
       <section className="identity-block">
         <div className="bracket-label"><span>身份</span></div>
-        <div className="profile-art-frame"><img src="/assets/life-landscape.png" alt="像素风松树与群山" /></div>
+        <div className="profile-art-frame"><img src="/assets/tulip-pixel-portrait.png" alt="Tulip 像素风个人头像" /></div>
         <h2>Tulip</h2><strong>v2.9.0</strong><span>正在构建</span>
       </section>
       <div className="sidebar-rule" />
-      <button className="sidebar-link" type="button" onClick={() => navigate("/projects")}><span>公开项目</span><strong><GitBranch size={24} /> main</strong><em>{publicProjectCount} 个可浏览仓库</em></button>
+      <button className="sidebar-link" type="button" onClick={() => navigate("/projects")}><span>公开项目</span><strong><GitBranch size={24} /> main</strong><em>{publicProjectCount} 个可浏览案例</em></button>
       <div className="sidebar-rule" />
       <button className="sidebar-link" type="button" onClick={() => navigate("/timeline")}><span>当前章节</span><strong>第二章</strong><em>构建 · 学习 · 交付</em></button>
       <div className="sidebar-rule" />
@@ -139,19 +242,33 @@ function ReleaseCard({ release = RELEASES[0], onOpen, compact = true }) {
   return <article className={`release-card ${compact ? "is-compact" : ""}`}><img className="tape-asset" src="/assets/release-tape.png" alt="" /><div className="release-card-heading">最新人生版本</div><div className="release-version"><Tag size={38} /><strong>{release.version}</strong></div><h3>— {release.title}</h3><dl><div><dt><CalendarBlank size={17} /> 发布于</dt><dd>{release.releasedOn}</dd></div><div><dt><GitCommit size={17} /> 提交数</dt><dd>{release.commits}</dd></div><div><dt><FileText size={17} /> 活跃天数</dt><dd>{release.activeDays}</dd></div></dl><div className="release-notes"><span>版本说明</span><p>{release.notes}</p></div><button className="text-link" type="button" onClick={onOpen}>查看版本 <ArrowRight size={18} /></button></article>;
 }
 
-function Overview({ commits, projects, publishedReadme, onNewCommit, onOpenCommit }) {
-  const featured = projects.filter((project) => project.visibility === "public").slice(0, 2);
-  return <div className="overview-page page-enter"><PageIntro title="Tulip" description="我不是一个完成品。我是一段版本历史。" eyebrow="v2.9.0 · 当前版本" action={<button className="pixel-button" type="button" onClick={onNewCommit}><Plus size={29} weight="bold" /> 提交</button>} /><ContributionGraph commits={commits} /><section className="profile-readme-strip"><div><span>/README.md</span><h2>你好，我是 Tulip</h2><p>{publishedReadme?.markdown.split("\n").find((line) => line && !line.startsWith("#"))}</p></div><button className="secondary-button" type="button" onClick={() => navigate("/readme")}>阅读自我介绍 <ArrowRight size={18} /></button></section><section className="featured-projects"><div className="section-toolbar"><h2><FolderOpen size={27} /> 代表项目</h2><button className="text-link" type="button" onClick={() => navigate("/projects")}>全部项目 <ArrowRight size={17} /></button></div><div className="project-card-grid">{featured.map((project) => <ProjectCard key={project.id} project={project} />)}</div></section><div className="overview-lower"><RecentCommits commits={commits} onOpen={onOpenCommit} /><ReleaseCard onOpen={() => navigate("/release")} /></div></div>;
+function Overview({ commits, projects, publishedReadme, ownerMode, onNewCommit, onOpenCommit }) {
+  const showcaseProjects = [...projects]
+    .filter((project) => ownerMode || project.visibility === "public")
+    .sort((a, b) => new Date(b.lastSyncedAt || 0) - new Date(a.lastSyncedAt || 0))
+    .slice(0, 7);
+  return <div className="overview-page page-enter"><PageIntro title="Tulip" description="我不是一个完成品。我是一段版本历史。" eyebrow="v2.9.0 · 当前版本" action={ownerMode ? <button className="pixel-button" type="button" onClick={onNewCommit}><Plus size={29} weight="bold" /> 提交</button> : null} /><ContributionGraph commits={commits} /><section className="profile-readme-strip"><div><span>/README.md</span><h2>你好，我是 Tulip</h2><p>{publishedReadme?.markdown.split("\n").find((line) => line && !line.startsWith("#"))}</p></div><button className="secondary-button" type="button" onClick={() => navigate("/readme")}>阅读自我介绍 <ArrowRight size={18} /></button></section><section className="featured-projects"><div className="section-toolbar"><h2><FolderOpen size={27} /> 7 个项目精华（{showcaseProjects.length}）</h2><button className="text-link" type="button" onClick={() => navigate("/projects")}>查看全部项目 <ArrowRight size={17} /></button></div><div className="project-card-grid">{showcaseProjects.map((project) => <ProjectCard key={project.id} project={project} />)}</div></section><div className="overview-lower"><RecentCommits commits={commits} onOpen={onOpenCommit} /><ReleaseCard onOpen={() => navigate("/release")} /></div></div>;
 }
 
 function ProjectCard({ project, ownerMode = false }) {
-  const images = project.files.filter((file) => file.kind === "image");
-  return <button className="project-card" type="button" onClick={() => navigate(`/projects/${encodeURIComponent(project.slug)}`)}>{images[0] ? <img src={images[0].previewUrl} alt="" /> : <div className="project-card-icon"><FolderOpen size={38} /></div>}<div className="project-card-copy"><div><span className={`visibility-dot ${project.visibility}`} />{project.sourceType === "github" ? <GithubLogo size={16} /> : <UploadSimple size={16} />}<small>{project.visibility === "public" ? "公开" : "私密"}</small></div><h3>{project.name}</h3><p>{project.description}</p><footer>{project.technologies.slice(0, 3).map((item) => <span key={item}>{item}</span>)}{ownerMode && <em>{project.syncStatus === "synced" ? "已同步" : "本地"}</em>}</footer></div><ArrowRight size={19} /></button>;
+  const cover = project.coverImage || project.files?.find((file) => file.kind === "image")?.previewUrl;
+  return (
+    <button className="project-card" type="button" onClick={() => navigate(`/projects/${encodeURIComponent(project.slug)}`)}>
+      {cover ? <img src={cover} alt={project.coverAlt || `${project.name} 封面`} /> : <div className="project-card-icon"><FolderOpen size={38} /></div>}
+      <div className="project-card-copy">
+        <div><span className={`visibility-dot ${project.visibility}`} /><small>{project.visibility === "public" ? "公开" : "私密"}</small></div>
+        <h3>{project.name}</h3>
+        <p>{project.summary || project.description}</p>
+        {project.highlights?.length ? <ul className="project-highlights">{project.highlights.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul> : null}
+      </div>
+      <ArrowRight size={19} />
+    </button>
+  );
 }
 
 function ProjectsPage({ projects, ownerMode }) {
   const visible = ownerMode ? projects : projects.filter((project) => project.visibility === "public");
-  return <div className="page page-enter"><PageIntro eyebrow="LIFE REPOSITORY" title="项目仓库" description="代码、图片和原始 README 被放在同一个可浏览的项目视图里。" action={ownerMode && <button className="pixel-button small" type="button" onClick={() => navigate("/admin/projects")}><Plus size={21} /> 导入项目</button>} /><div className="project-summary-bar"><div><FolderOpen size={26} /><span><strong>{visible.length}</strong><small>{ownerMode ? "全部项目" : "公开项目"}</small></span></div><div><FileCode size={26} /><span><strong>{visible.reduce((count, project) => count + project.files.filter((file) => ["code","markdown"].includes(file.kind)).length, 0)}</strong><small>代码与文档</small></span></div><div><FileImage size={26} /><span><strong>{visible.reduce((count, project) => count + project.files.filter((file) => file.kind === "image").length, 0)}</strong><small>项目图片</small></span></div></div><div className="project-card-grid large">{visible.map((project) => <ProjectCard key={project.id} project={project} ownerMode={ownerMode} />)}</div>{!visible.length && <div className="empty-state large">还没有公开项目。</div>}</div>;
+  return <div className="page page-enter"><PageIntro eyebrow="LIFE PORTFOLIO" title="精选项目" description="这里记录我把想法变成真实产品的过程，也展示每一次尝试留下的成果。" action={ownerMode && <button className="pixel-button small" type="button" onClick={() => navigate("/admin/projects")}><Plus size={21} /> 导入项目</button>} /><div className="project-summary-bar"><div><FolderOpen size={26} /><span><strong>{visible.length}</strong><small>{ownerMode ? "全部项目" : "公开项目"}</small></span></div><div><FileText size={26} /><span><strong>{visible.filter((project) => Boolean(project.coverImage)).length}</strong><small>项目封面</small></span></div><div><FileText size={26} /><span><strong>{visible.reduce((count, project) => count + (project.summary ? 1 : 0), 0)}</strong><small>内容摘要</small></span></div></div><div className="project-card-grid large">{visible.map((project) => <ProjectCard key={project.id} project={project} ownerMode={ownerMode} />)}</div>{!visible.length && <div className="empty-state large">还没有公开项目。</div>}</div>;
 }
 
 function FileIcon({ kind, size = 19 }) { if (kind === "image") return <FileImage size={size} />; if (kind === "markdown") return <FileText size={size} />; if (kind === "code") return <FileCode size={size} />; if (kind === "blocked") return <Lock size={size} />; return <File size={size} />; }
@@ -161,25 +278,83 @@ function MarkdownView({ markdown = "" }) {
   const flush = () => { if (list.length) { nodes.push(<ul key={`list-${nodes.length}`}>{list.map((item, index) => <li key={index}>{renderInline(item)}</li>)}</ul>); list = []; } };
   blocks.forEach((line, index) => { if (/^[-*] /.test(line)) { list.push(line.slice(2)); return; } flush(); if (line.startsWith("### ")) nodes.push(<h3 key={index}>{renderInline(line.slice(4))}</h3>); else if (line.startsWith("## ")) nodes.push(<h2 key={index}>{renderInline(line.slice(3))}</h2>); else if (line.startsWith("# ")) nodes.push(<h1 key={index}>{renderInline(line.slice(2))}</h1>); else if (/^\d+\. /.test(line)) nodes.push(<p className="numbered" key={index}>{renderInline(line)}</p>); else if (line.trim()) nodes.push(<p key={index}>{renderInline(line)}</p>); }); flush(); return <div className="markdown-body">{nodes}</div>;
 }
+function ShareButton({ title, text, onToast }) {
+  const share = async () => {
+    const payload = { title, text, url: window.location.href };
+    try {
+      if (navigator.share) await navigator.share(payload);
+      else { await navigator.clipboard.writeText(window.location.href); onToast?.("链接已复制，可以直接分享"); }
+    } catch (error) { if (error?.name !== "AbortError") onToast?.("暂时无法分享，请复制地址栏链接"); }
+  };
+  return <button className="share-button" type="button" onClick={share}><ShareNetwork size={18} /> 分享这页</button>;
+}
+
+function ProjectCaseStudy({ project, onToast }) {
+  const data = project.profileData;
+  if (!data) return null;
+  const bullets = data.responsibilities || data.key_design || data.interaction?.core_objects || [];
+  const evidence = data.evidence || [];
+  return <section className="project-case-study"><header><div><span>CASE STUDY / VERIFIED NOTES</span><h2>{data.name}</h2></div><ShareButton title={data.name} text={data.one_liner || project.description} onToast={onToast} /></header><div className="case-study-lead"><strong>{data.one_liner}</strong><p>{data.background || data.description || data.idea}</p></div><div className="case-study-grid">{data.role && <article><span>我的角色</span><strong>{data.role}</strong></article>}{data.product_idea && <article><span>产品思路</span><p>{data.product_idea}</p></article>}{data.positioning && <article><span>方向</span><strong>{data.positioning}</strong></article>}{bullets.length > 0 && <article><span>关键工作</span><ul>{bullets.slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul></article>}</div>{evidence.length > 0 && <div className="evidence-strip"><span><ShieldCheck size={18} /> 能力与证据</span><div>{evidence.map((item) => <code key={item}>{item}</code>)}</div></div>}{(data.personal_takeaway || data.personal_meaning || data.why_i_like_it) && <blockquote>{data.personal_takeaway || data.personal_meaning || data.why_i_like_it}</blockquote>}<footer><span>来源：Tulip 个人资料导入文件</span><span>公开案例内容，不包含内部附件</span></footer></section>;
+}
 function renderInline(value) {
   const parts = String(value).split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
   return parts.map((part, index) => part.startsWith("**") ? <strong key={index}>{part.slice(2,-2)}</strong> : part.startsWith("`") ? <code key={index}>{part.slice(1,-1)}</code> : part);
 }
 
 function ProjectDetailPage({ project, ownerMode, onUpdateProject, onToast }) {
-  const uploadRef = useRef(null); const accessible = ownerMode ? project.files : project.files.filter((file) => file.visibility === "public"); const ordered = sortFiles(accessible); const [selectedPath, setSelectedPath] = useState(() => ordered.find((file) => /(^|\/)readme\.md$/i.test(file.path))?.path || ordered[0]?.path); const [loadingFile, setLoadingFile] = useState(false); const selected = ordered.find((file) => file.path === selectedPath) || ordered[0];
-  useEffect(() => { if (selectedPath && !ordered.some((file) => file.path === selectedPath)) setSelectedPath(ordered[0]?.path); }, [ordered, selectedPath]);
-  const selectFile = async (file) => { setSelectedPath(file.path); if (!file.content && file.remoteUrl && ["code","markdown"].includes(file.kind)) { setLoadingFile(true); try { const hydrated = await hydrateRemoteFile(file); onUpdateProject({ ...project, files: project.files.map((item) => item.path === file.path ? hydrated : item) }); } catch (error) { onToast(error.message); } finally { setLoadingFile(false); } } };
-  useEffect(() => { if (selected && !selected.content && selected.remoteUrl && ["code", "markdown"].includes(selected.kind)) selectFile(selected); }, [project.id, selected?.path, selected?.sha]);
-  const handleUpload = async (event) => { if (!event.target.files?.length) return; try { const additions = await prepareLocalUploads(event.target.files); onUpdateProject({ ...project, files: [...project.files.filter((existing) => !additions.some((file) => file.path === existing.path)), ...additions], syncStatus: "local", lastSyncedAt: new Date().toISOString() }); onToast(`已加入 ${additions.length} 个文件，默认为私密`); } catch (error) { onToast(error.message); } event.target.value = ""; };
-  const toggleProject = () => { onUpdateProject({ ...project, visibility: project.visibility === "public" ? "private" : "public" }); onToast(project.visibility === "public" ? "项目已转为私密" : "项目已发布；只有标记为公开的文件可被访客读取"); };
-  const toggleFile = () => { if (!selected) return; onUpdateProject({ ...project, files: project.files.map((file) => file.path === selected.path ? { ...file, visibility: file.visibility === "public" ? "private" : "public" } : file) }); };
-  return <div className="page project-detail-page page-enter"><button className="back-link" type="button" onClick={() => navigate("/projects")}><ArrowLeft size={17} /> 返回项目</button><PageIntro eyebrow={`${project.sourceType === "github" ? "GITHUB" : "UPLOAD"} / ${project.defaultBranch}`} title={project.name} description={project.description} action={ownerMode && <div className="project-owner-actions"><input ref={uploadRef} hidden type="file" multiple onChange={handleUpload} /><button className="secondary-button" type="button" onClick={() => uploadRef.current?.click()}><UploadSimple size={19} /> 上传文件</button><button className={`pixel-button small ${project.visibility === "public" ? "published" : ""}`} type="button" onClick={toggleProject}>{project.visibility === "public" ? <EyeSlash size={19} /> : <Eye size={19} />}{project.visibility === "public" ? "转为私密" : "发布项目"}</button></div>} /><div className="repo-status-line"><span className={`sync-pill ${project.syncStatus}`}><span />{project.syncStatus === "synced" ? "已同步" : "本地更改"}</span><code>{project.headSha}</code><span>{formatDateTime(project.lastSyncedAt)}</span>{project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noreferrer"><GithubLogo size={18} /> 在 GitHub 查看</a>}</div><div className="repository-browser"><aside className="file-tree"><header><FolderOpen size={20} /><strong>{project.name}</strong><span>{ordered.length}</span></header>{ordered.map((file) => <button key={file.path} type="button" className={selected?.path === file.path ? "is-active" : ""} onClick={() => selectFile(file)} title={file.path}><FileIcon kind={file.kind} /><span>{file.path}</span>{file.visibility === "private" && <Lock size={14} />}</button>)}</aside><section className="file-preview"><header><div><FileIcon kind={selected?.kind} /><strong>{selected?.path || "无文件"}</strong></div><span>{selected && formatBytes(selected.size)}</span>{ownerMode && selected && <button type="button" className="visibility-button" onClick={toggleFile}>{selected.visibility === "public" ? <Eye size={16} /> : <Lock size={16} />}{selected.visibility === "public" ? "公开" : "私密"}</button>}</header>{loadingFile ? <div className="preview-loading"><ArrowClockwise className="spin" size={27} /> 正在读取文件…</div> : selected?.kind === "markdown" ? <MarkdownView markdown={selected.content || project.readme} /> : selected?.kind === "code" ? <pre className="code-view"><code>{selected.content || "文件内容需要同步后才能预览。"}</code></pre> : selected?.kind === "image" ? <div className="image-preview"><img src={selected.previewUrl} alt={selected.path} /><span>{selected.path}</span></div> : <div className="blocked-preview"><Lock size={34} /><h3>此文件不可预览</h3><p>{selected?.blockedReason || "二进制或超大文件只保留索引。"}</p></div>}</section></div>{accessible.some((file) => file.kind === "image") && <section className="image-gallery"><div className="section-toolbar"><h2><Image size={25} /> 项目图片</h2><span>{accessible.filter((file) => file.kind === "image").length} 张</span></div><div>{accessible.filter((file) => file.kind === "image").map((file) => <button type="button" key={file.path} onClick={() => selectFile(file)}><img src={file.previewUrl} alt={file.path} /><span>{file.path}</span></button>)}</div></section>}</div>;
+  const isBmo = project.slug === "advx-bmo";
+  const fallbackContext = isBmo ? {
+    title: "Adventure X 2026 黑客松",
+    dates: "2026.07.22–07.27",
+    track: "Photon 赛道",
+    role: "实体 Agent / 交互原型",
+    description: "我们把 BMO 做成一个可以被触摸、被看见、也能在关键动作前征得确认的实体伙伴。项目重点不是堆叠功能，而是探索 Agent 如何从“理解”可靠地走到“行动”。",
+  } : null;
+  const fallbackGallery = isBmo ? [
+    { src: "/assets/bmo-hackathon-device.jpg", alt: "Adventure X 黑客松现场的 BMO 实体原型", caption: "现场原型：把语音、屏幕和实体按键放进一个可交互的 BMO 外壳。" },
+    { src: "/assets/bmo-hackathon-character.jpg", alt: "BMO 概念形象", caption: "概念形象：用熟悉而有情绪的角色感，降低人与 Agent 第一次互动的距离。" },
+  ] : [];
+  const cover = project.coverImage || project.files.find((file) => file.kind === "image")?.previewUrl;
+  const summary = isBmo ? "这是我在 Adventure X 黑客松期间完成的 BMO 原型：把一个会听、会理解、会行动的 Agent 装进实体设备。它先通过语音理解意图，再在屏幕上让人确认，最后才执行消息或其他操作。" : project.summary || "这个项目正在持续补充中。可继续添加关键目标、方法与结果。";
+  const context = project.context || fallbackContext;
+  const gallery = project.gallery?.length ? project.gallery : fallbackGallery;
+  const highlights = project.highlights?.length
+    ? project.highlights
+    : inferSummaryFromReadme(project.readme || "").highlights;
+  const toggleProject = () => { onUpdateProject({ ...project, visibility: project.visibility === "public" ? "private" : "public" }); onToast(project.visibility === "public" ? "项目已转为私密" : "项目已发布"); };
+  return (
+    <div className="page project-detail-page page-enter">
+      <button className="back-link" type="button" onClick={() => navigate("/projects")}><ArrowLeft size={17} /> 返回项目</button>
+      <PageIntro eyebrow="项目作品" title={project.name} description={summary} action={ownerMode && <div className="project-owner-actions"><button className={`pixel-button small ${project.visibility === "public" ? "published" : ""}`} type="button" onClick={toggleProject}>{project.visibility === "public" ? <EyeSlash size={19} /> : <Eye size={19} />}{project.visibility === "public" ? "转为私密" : "发布项目"}</button></div>} />
+      <div className="project-share-row"><ShareButton title={project.name} text={project.summary || project.description} onToast={onToast} /></div>
+      {context && <section className="project-context"><div className="project-context-heading"><span>现场项目 / HACKATHON</span><h2>{context.title}</h2></div><div className="project-context-grid"><div><span>时间</span><strong>{context.dates}</strong></div><div><span>赛道</span><strong>{context.track}</strong></div><div><span>作品形态</span><strong>{context.role}</strong></div></div><p>{context.description}</p></section>}
+      <section className="project-detail-summary">
+        <div className="project-detail-cover">
+          {cover ? <img src={cover} alt={project.coverAlt || `${project.name} 封面`} /> : <FolderOpen size={64} />}
+        </div>
+        <article>
+          <span className={`visibility-dot ${project.visibility}`}>{project.visibility === "public" ? "公开" : "私密"}</span>
+          {ownerMode && <p className="project-detail-meta">当前展示：项目摘要与关键成果（不展示源码树）</p>}
+      <h2>项目摘要</h2>
+      <p>{summary}</p>
+      {!!highlights?.length && (
+        <ul className="project-detail-highlights">
+          {highlights.slice(0, 4).map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      )}
+      <div className="project-case-actions"><code>版本快照：{project.headSha}</code></div>
+      </article>
+      </section>
+      {gallery.length > 0 && <section className="project-gallery"><header><div><span>现场记录 / PROCESS</span><h2>从概念到实体原型</h2></div><p>黑客松期间留下的 BMO 视觉与现场记录。</p></header><div className="project-gallery-grid">{gallery.map((photo) => <figure key={photo.src}><img src={photo.src} alt={photo.alt} /><figcaption>{photo.caption}</figcaption></figure>)}</div></section>}
+      <ProjectCaseStudy project={project} onToast={onToast} />
+      <section className="project-detail-section"><h2><Image size={21} /> 项目状态</h2><p>最近同步：{formatDateTime(project.lastSyncedAt)} · 可见性：{project.visibility === "public" ? "公开" : "私密"}。</p></section>
+      </div>
+  );
 }
 
-function TimelinePage({ commits, onOpenCommit, onNewCommit }) {
+function TimelinePage({ commits, ownerMode, onOpenCommit, onNewCommit }) {
   const [filter, setFilter] = useState("全部"); const filtered = commits.filter((commit) => filter === "全部" || commit.type === filter); const years = filtered.reduce((groups, commit) => ({ ...groups, [commit.date.slice(0,4)]: [...(groups[commit.date.slice(0,4)] || []), commit] }), {});
-  return <div className="page page-enter"><PageIntro eyebrow="分支 / main" title="人生时间线" description="每一次提交都会留下轨迹。点击主线节点，打开完整记录。" action={<button className="pixel-button small" type="button" onClick={onNewCommit}><Plus size={22} /> 提交</button>} /><div className="timeline-controls">{["全部", ...COMMIT_TYPES].map((type) => <button key={type} className={filter === type ? "is-active" : ""} type="button" onClick={() => setFilter(type)}>{type === "全部" ? type : typeLabels[type]}</button>)}</div><div className="year-groups">{Object.entries(years).sort(([a],[b]) => b.localeCompare(a)).map(([year, items]) => <section className="year-group" key={year}><h2>{year}</h2><div className="timeline-full-list">{items.map((commit) => { const Icon = typeMeta[commit.type]?.icon || GitCommit; return <button className="timeline-entry" type="button" key={commit.id} onClick={() => onOpenCommit(commit)}><span className="timeline-full-node"><Icon size={18} /></span><time>{formatLongDate(commit.date).replace(`, ${year}`, "")}</time><span><strong>{commit.title}</strong><small>{commit.description}</small></span><TypeBadge type={commit.type} /><code>{commit.id}</code><ArrowRight size={19} /></button>; })}</div></section>)}</div></div>;
+  return <div className="page page-enter"><PageIntro eyebrow="分支 / main" title="人生时间线" description="每一次提交都会留下轨迹。点击主线节点，打开完整记录。" action={ownerMode ? <button className="pixel-button small" type="button" onClick={onNewCommit}><Plus size={22} /> 提交</button> : null} /><div className="timeline-controls">{["全部", ...COMMIT_TYPES].map((type) => <button key={type} className={filter === type ? "is-active" : ""} type="button" onClick={() => setFilter(type)}>{type === "全部" ? type : typeLabels[type]}</button>)}</div><div className="year-groups">{Object.entries(years).sort(([a],[b]) => b.localeCompare(a)).map(([year, items]) => <section className="year-group" key={year}><h2>{year}</h2><div className="timeline-full-list">{items.map((commit) => { const Icon = typeMeta[commit.type]?.icon || GitCommit; return <button className="timeline-entry" type="button" key={commit.id} onClick={() => onOpenCommit(commit)}><span className="timeline-full-node"><Icon size={18} /></span><time>{formatLongDate(commit.date).replace(`, ${year}`, "")}</time><span><strong>{commit.title}</strong><small>{commit.description}</small></span><TypeBadge type={commit.type} /><code>{commit.id}</code><ArrowRight size={19} /></button>; })}</div></section>)}</div></div>;
 }
 
 function ReleasePage() { const [selected, setSelected] = useState(RELEASES[0]); return <div className="page page-enter"><PageIntro eyebrow="版本历史" title="人生版本" description="版本不会替代过去，它只解释我发生了哪些变化。" /><div className="release-page-grid"><div className="version-picker">{RELEASES.map((release) => <button type="button" key={release.version} className={selected.version === release.version ? "is-active" : ""} onClick={() => setSelected(release)}><span>{release.version}</span><strong>{release.title}</strong><small>{release.range}</small><ArrowRight size={18} /></button>)}</div><ReleaseCard release={selected} compact={false} onOpen={() => {}} /><section className="major-changes"><span>主要变化</span><h2>{selected.version} 发生了什么</h2>{selected.changes.map((change) => <div key={change}><Check size={20} weight="bold" /><span>{change}</span></div>)}</section></div></div>; }
@@ -191,7 +366,7 @@ function PublicReadmePage({ readme }) {
 function ResumePage() {
   const profile = RESUME_PROFILE;
   return <div className="page resume-page page-enter">
-    <PageIntro eyebrow="PUBLIC PROFILE / BUILDER" title={`${profile.displayName} · ${profile.englishName}`} description={profile.summary} action={<a className="secondary-button resume-github-link" href="https://github.com/tulip627722-byte" target="_blank" rel="noreferrer"><GithubLogo size={19} /> GitHub 主页</a>} />
+    <PageIntro eyebrow="PUBLIC PROFILE / BUILDER" title={`${profile.displayName} · ${profile.englishName}`} description={profile.summary} action={<div className="resume-page-actions"><ShareButton title={`${profile.displayName} · ${profile.englishName}`} text={profile.summary} /><a className="secondary-button resume-github-link" href="https://github.com/tulip627722-byte" target="_blank" rel="noreferrer"><GithubLogo size={19} /> GitHub 主页</a></div>} />
     <div className="resume-hero imported-profile-hero"><div><span>HELLO, I BUILD THINGS</span><h2>{profile.headline}</h2><blockquote>{profile.tagline}</blockquote><p>{profile.longIntro}</p></div><div className="resume-skill-cloud">{profile.skills.slice(0, 16).map((skill) => <span key={skill}>{skill}</span>)}</div></div>
     <section className="resume-section"><div className="resume-section-title"><Sparkle size={27} /><div><span>PERSONALITY</span><h2>我是怎样的人</h2></div></div><div className="profile-trait-grid">{profile.traits.map((trait) => <article key={trait.name}><strong>{trait.name}</strong><p>{trait.description}</p></article>)}</div><div className="working-style-list">{profile.workingStyle.map((item) => <span key={item}><Check size={16} weight="bold" />{item}</span>)}</div><blockquote className="self-definition">{profile.selfDefinition}</blockquote></section>
     <section className="resume-section"><div className="resume-section-title"><GraduationCap size={27} /><div><span>EDUCATION</span><h2>教育经历</h2></div></div><article className="education-card"><header><strong>{profile.education.school}</strong><time>{profile.education.period}</time></header><h3>{profile.education.program}</h3><p>{profile.education.detail}</p>{profile.education.meaning && <blockquote>{profile.education.meaning}</blockquote>}</article></section>
@@ -199,7 +374,7 @@ function ResumePage() {
     <section className="resume-section"><div className="resume-section-title"><Code size={27} /><div><span>BACKGROUND</span><h2>技术与产品背景</h2></div></div><div className="technical-background-grid">{profile.technicalBackground.map((area) => <article key={area.title}><span>{area.title}</span><p>{area.description}</p><div>{area.keywords.map((keyword) => <code key={keyword}>{keyword}</code>)}</div></article>)}</div></section>
     <section className="resume-section"><div className="resume-section-title"><Sparkle size={27} /><div><span>SELECTED WORK</span><h2>项目与成果</h2></div></div><div className="resume-highlight-grid">{profile.highlights.map((highlight) => <article key={highlight.title}><span>{highlight.meta}</span><h3>{highlight.title}</h3><p>{highlight.detail}</p></article>)}</div></section>
     <section className="resume-section"><div className="resume-section-title"><Tag size={27} /><div><span>SKILLS</span><h2>能力地图</h2></div></div><div className="skill-group-grid">{profile.skillGroups.map((group) => <article key={group.category}><strong>{group.category}</strong><div>{group.items.map((item) => <span key={item}>{item}</span>)}</div></article>)}</div></section>
-    <footer className="resume-source-note"><ShieldCheck size={21} /><span>已按个人资料文件导入公开内容；内部文件名、手机号与引用标记没有进入网页。README 新内容仍是待确认草稿。</span></footer>
+    <section className="resume-section public-contact-section"><div className="resume-section-title"><ShareNetwork size={27} /><div><span>LET'S CONNECT</span><h2>公开联系</h2></div></div><p>如果你想聊 AI 产品、Agent、硬件或一起做个 Prototype，可以通过下面的公开账号找到我。</p><div className="contact-links">{profile.contact.taraUrl ? <a href={profile.contact.taraUrl} target="_blank" rel="noreferrer">TARA 384874 <ArrowRight size={17} /></a> : <span className="contact-placeholder">TARA 384874</span>}{profile.contact.xiaohongshuUrl ? <a href={profile.contact.xiaohongshuUrl} target="_blank" rel="noreferrer">小红书 428816610 <ArrowRight size={17} /></a> : <span className="contact-placeholder">小红书 428816610</span>}</div></section><footer className="resume-source-note"><ShieldCheck size={21} /><span>已按个人资料文件导入公开内容；内部文件名、手机号与引用标记没有进入网页。README 新内容仍是待确认草稿。</span></footer>
   </div>;
 }
 
@@ -230,7 +405,7 @@ function Modal({ title, children, onClose, className = "" }) { return <div class
 function ImportProjectModal({ onClose, onImport, onToast }) {
   const [url, setUrl] = useState(""); const [visibility, setVisibility] = useState("private"); const [busy, setBusy] = useState(false); const installationId = new URLSearchParams(window.location.search).get("installation");
   const installGithubApp = async () => { try { const payload = await apiRequest("/api/github/install", { method: "POST", body: "{}" }); window.location.assign(payload.url); } catch { onToast("本地预览无需安装 GitHub App；可以直接导入公开仓库"); } };
-  const submit = async (event) => { event.preventDefault(); setBusy(true); try { let project; try { const payload = await apiRequest("/api/projects/import", { method: "POST", body: JSON.stringify({ githubUrl: url, visibility, installationId }) }); project = payload.project; } catch { const { repository, files, readme } = await importPublicGithubRepository(url); project = { id: makeId("project"), slug: slugify(repository.name), name: repository.name, description: repository.description || "导入自 GitHub 的项目", sourceType: "github", githubUrl: repository.html_url, repoFullName: repository.full_name, defaultBranch: repository.default_branch, headSha: files[0]?.sha?.slice(0,7) || "imported", visibility, syncStatus: "synced", lastSyncedAt: new Date().toISOString(), technologies: repository.language ? [repository.language] : [], readme, files }; onToast("使用 GitHub 公开 API 完成本地导入；部署后可换为 GitHub App 私有仓库授权"); } onImport(project); } catch (error) { onToast(error.message); } finally { setBusy(false); } };
+  const submit = async (event) => { event.preventDefault(); setBusy(true); try { let project; try { const payload = await apiRequest("/api/projects/import", { method: "POST", body: JSON.stringify({ githubUrl: url, visibility, installationId }) }); project = deriveProjectDigest(payload.project); } catch { const { repository, files, readme } = await importPublicGithubRepository(url); project = deriveProjectDigest({ id: makeId("project"), slug: slugify(repository.name), name: repository.name, description: repository.description || "导入自 GitHub 的项目", sourceType: "github", githubUrl: repository.html_url, repoFullName: repository.full_name, defaultBranch: repository.default_branch, headSha: files[0]?.sha?.slice(0,7) || "imported", visibility, syncStatus: "synced", lastSyncedAt: new Date().toISOString(), technologies: repository.language ? [repository.language] : [], readme, files }); onToast("使用 GitHub 公开 API 完成本地导入；部署后可换为 GitHub App 私有仓库授权"); } onImport(project); } catch (error) { onToast(error.message); } finally { setBusy(false); } };
   return <Modal title="导入 GitHub 项目" onClose={onClose} className="import-modal"><form onSubmit={submit}><div className="github-app-note"><GithubLogo size={32} /><div><strong>{installationId ? "GitHub App 已连接" : "只读 GitHub 连接"}</strong><p>{installationId ? `安装 ${installationId} 已授权，可导入所选私有仓库。` : "不会修改原仓库或回写 README。部署后通过 GitHub App 只授权你选择的仓库。"}</p></div>{!installationId && <button className="secondary-button" type="button" onClick={installGithubApp}>选择仓库</button>}</div><label>GitHub 仓库地址<input autoFocus value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://github.com/owner/repository" required /></label><fieldset><legend>导入后可见性</legend><div className="visibility-options"><button type="button" className={visibility === "private" ? "is-active" : ""} onClick={() => setVisibility("private")}><Lock size={20} /><span><strong>先保持私密</strong><small>检查文件后再发布</small></span></button><button type="button" className={visibility === "public" ? "is-active" : ""} onClick={() => setVisibility("public")}><Eye size={20} /><span><strong>公开项目</strong><small>文件仍需单独标记为公开</small></span></button></div></fieldset><footer><button type="button" className="secondary-button" onClick={onClose}>取消</button><button className="pixel-button small" type="submit" disabled={busy}>{busy ? <ArrowClockwise className="spin" size={19} /> : <GithubLogo size={19} />}{busy ? "正在读取…" : "导入仓库"}</button></footer></form></Modal>;
 }
 
@@ -247,18 +422,18 @@ function SettingsModal({ ownerMode, onOwnerToggle, commits, projects, onClose, o
 }
 
 export function App() {
-  const [route, setRoute] = useState(currentRoute); const [commits, setCommits] = useState(() => loadJson(storageKey, INITIAL_COMMITS)); const [projects, setProjects] = useState(() => loadJson(projectStorageKey, INITIAL_PROJECTS)); const [readmeState, setReadmeState] = useState(() => loadJson(readmeStorageKey, INITIAL_README_STATE)); const [ownerMode, setOwnerMode] = useState(() => loadJson(ownerStorageKey, true));
+  const [route, setRoute] = useState(currentRoute); const [commits, setCommits] = useState(() => loadJson(storageKey, INITIAL_COMMITS)); const [projects, setProjects] = useState(() => buildProjectDigest(loadJson(projectStorageKey, INITIAL_PROJECTS))); const [readmeState, setReadmeState] = useState(() => loadJson(readmeStorageKey, INITIAL_README_STATE)); const [ownerMode, setOwnerMode] = useState(() => loadJson(ownerStorageKey, false));
   const [serverState, setServerState] = useState({ available: false, owner: false, githubConfigured: false, aiConfigured: false }); const [newCommitOpen, setNewCommitOpen] = useState(false); const [selectedCommit, setSelectedCommit] = useState(null); const [settingsOpen, setSettingsOpen] = useState(false); const [toast, setToast] = useState(""); const orderedCommits = useMemo(() => sortCommits(commits), [commits]); const publishedReadme = readmeState.versions.find((item) => item.id === readmeState.publishedId) || readmeState.versions[0];
   useEffect(() => { const onPop = () => setRoute(currentRoute()); window.addEventListener("popstate", onPop); return () => window.removeEventListener("popstate", onPop); }, []);
-  useEffect(() => { let active = true; (async () => { try { const sessionResponse = await fetch("/api/session", { headers: { accept: "application/json" } }); if (!(sessionResponse.headers.get("content-type") || "").includes("application/json")) return; const session = await sessionResponse.json().catch(() => ({})); if (!active) return; const authenticated = sessionResponse.ok && Boolean(session.owner); setServerState({ available: true, owner: authenticated, githubConfigured: Boolean(session.githubConfigured), aiConfigured: Boolean(session.aiConfigured) }); setOwnerMode(authenticated); const [projectsResponse, profileResponse, versionsResponse] = await Promise.all([fetch(authenticated ? "/api/projects" : "/api/public/projects", { headers: { accept: "application/json" } }), fetch("/api/public/profile", { headers: { accept: "application/json" } }), authenticated ? fetch("/api/profile/readme/versions", { headers: { accept: "application/json" } }) : Promise.resolve(null)]); const projectPayload = await projectsResponse.json(); const profilePayload = await profileResponse.json(); if (!active) return; if (Array.isArray(projectPayload.projects) && projectPayload.projects.length) setProjects(projectPayload.projects); if (Array.isArray(profilePayload.commits) && profilePayload.commits.length) setCommits(profilePayload.commits); if (versionsResponse?.ok) { const versionPayload = await versionsResponse.json(); const versions = versionPayload.versions || []; if (versions.length) { const published = versions.find((item) => item.status === "published"); const draft = versions.find((item) => item.status === "draft"); setReadmeState({ publishedId: published?.id || versions[0].id, draftId: draft?.id || null, sourceFingerprint: draft?.sourceFingerprint || published?.sourceFingerprint || "", versions }); } } else if (profilePayload.readme) setReadmeState({ publishedId: profilePayload.readme.id, draftId: null, sourceFingerprint: profilePayload.readme.sourceFingerprint || "", versions: [profilePayload.readme] }); } catch { /* Vite local preview intentionally uses browser data. */ } })(); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; (async () => { try { const sessionResponse = await fetch("/api/session", { headers: { accept: "application/json" } }); if (!(sessionResponse.headers.get("content-type") || "").includes("application/json")) return; const session = await sessionResponse.json().catch(() => ({})); if (!active) return; const authenticated = sessionResponse.ok && Boolean(session.owner); setServerState({ available: true, owner: authenticated, githubConfigured: Boolean(session.githubConfigured), aiConfigured: Boolean(session.aiConfigured) }); setOwnerMode(authenticated); const [projectsResponse, profileResponse, versionsResponse] = await Promise.all([fetch(authenticated ? "/api/projects" : "/api/public/projects", { headers: { accept: "application/json" } }), fetch("/api/public/profile", { headers: { accept: "application/json" } }), authenticated ? fetch("/api/profile/readme/versions", { headers: { accept: "application/json" } }) : Promise.resolve(null)]); const projectPayload = await projectsResponse.json(); const profilePayload = await profileResponse.json(); if (!active) return; if (Array.isArray(projectPayload.projects) && projectPayload.projects.length) setProjects(buildProjectDigest(projectPayload.projects)); if (Array.isArray(profilePayload.commits) && profilePayload.commits.length) setCommits(profilePayload.commits); if (versionsResponse?.ok) { const versionPayload = await versionsResponse.json(); const versions = versionPayload.versions || []; if (versions.length) { const published = versions.find((item) => item.status === "published"); const draft = versions.find((item) => item.status === "draft"); setReadmeState({ publishedId: published?.id || versions[0].id, draftId: draft?.id || null, sourceFingerprint: draft?.sourceFingerprint || published?.sourceFingerprint || "", versions }); } } else if (profilePayload.readme) setReadmeState({ publishedId: profilePayload.readme.id, draftId: null, sourceFingerprint: profilePayload.readme.sourceFingerprint || "", versions: [profilePayload.readme] }); } catch { /* Vite local preview intentionally uses browser data. */ } })(); return () => { active = false; }; }, []);
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(commits)); }, [commits]);
   useEffect(() => { try { localStorage.setItem(projectStorageKey, JSON.stringify(projects)); } catch { setToast("浏览器存储空间不足，大图片只会保留在当前会话"); } }, [projects]);
   useEffect(() => { localStorage.setItem(readmeStorageKey, JSON.stringify(readmeState)); }, [readmeState]); useEffect(() => { localStorage.setItem(ownerStorageKey, JSON.stringify(ownerMode)); }, [ownerMode]); useEffect(() => { if (!toast) return undefined; const timeout = window.setTimeout(() => setToast(""), 3600); return () => window.clearTimeout(timeout); }, [toast]);
   const saveCommit = (commit) => { setCommits((current) => [commit, ...current]); setNewCommitOpen(false); navigate("/"); setToast(`已提交 ${commit.id} · ${commit.title}`); };
-  const updateProject = (updated) => { setProjects((current) => { const previous = current.find((item) => item.id === updated.id); if (serverState.available && serverState.owner && previous) { if (previous.visibility !== updated.visibility) apiRequest(`/api/projects/${updated.id}`, { method: "PATCH", body: JSON.stringify({ visibility: updated.visibility }) }).catch(() => setToast("项目可见性未能写入服务端")); const previousFiles = new Map(previous.files.map((file) => [file.path, file])); for (const file of updated.files) { const before = previousFiles.get(file.path); if (before && before.visibility !== file.visibility) apiRequest(`/api/projects/${updated.id}/files`, { method: "PATCH", body: JSON.stringify({ path: file.path, visibility: file.visibility }) }).catch(() => setToast("文件可见性未能写入服务端")); if (!before && ["code", "markdown", "image"].includes(file.kind)) { const isDataUrl = file.kind === "image" && file.previewUrl?.startsWith("data:"); const content = isDataUrl ? file.previewUrl.split(",")[1] : file.content || ""; const contentType = isDataUrl ? file.previewUrl.slice(5, file.previewUrl.indexOf(";")) : file.kind === "markdown" ? "text/markdown" : "text/plain"; apiRequest(`/api/projects/${updated.id}/uploads`, { method: "POST", body: JSON.stringify({ path: file.path, content, contentType, encoding: isDataUrl ? "base64" : "utf8" }) }).catch(() => setToast(`文件 ${file.path} 未能上传到服务端`)); } } } return current.map((project) => project.id === updated.id ? updated : project); }); };
+  const updateProject = (updated) => { setProjects((current) => { const previous = current.find((item) => item.id === updated.id); if (serverState.available && serverState.owner && previous) { if (previous.visibility !== updated.visibility) apiRequest(`/api/projects/${updated.id}`, { method: "PATCH", body: JSON.stringify({ visibility: updated.visibility }) }).catch(() => setToast("项目可见性未能写入服务端")); const previousFiles = new Map(previous.files.map((file) => [file.path, file])); for (const file of updated.files) { const before = previousFiles.get(file.path); if (before && before.visibility !== file.visibility) apiRequest(`/api/projects/${updated.id}/files`, { method: "PATCH", body: JSON.stringify({ path: file.path, visibility: file.visibility }) }).catch(() => setToast("文件可见性未能写入服务端")); if (!before && ["code", "markdown", "image"].includes(file.kind)) { const isDataUrl = file.kind === "image" && file.previewUrl?.startsWith("data:"); const content = isDataUrl ? file.previewUrl.split(",")[1] : file.content || ""; const contentType = isDataUrl ? file.previewUrl.slice(5, file.previewUrl.indexOf(";")) : file.kind === "markdown" ? "text/markdown" : "text/plain"; apiRequest(`/api/projects/${updated.id}/uploads`, { method: "POST", body: JSON.stringify({ path: file.path, content, contentType, encoding: isDataUrl ? "base64" : "utf8" }) }).catch(() => setToast(`文件 ${file.path} 未能上传到服务端`)); } } } return current.map((project) => project.id === updated.id ? deriveProjectDigest(updated) : project); }); };
   const toggleOwner = () => { if (serverState.available && !serverState.owner) { if (serverState.githubConfigured) window.location.assign("/api/auth/github/start"); else setToast("公开主页已上线；Tulip 管理登录将在配置 GitHub App 后开放"); return; } setOwnerMode((current) => !current); if (ownerMode && route.name.startsWith("admin")) navigate("/"); };
-  const migrate = async () => { try { const result = await apiRequest("/api/migrate/local", { method: "POST", body: JSON.stringify({ commits, projects, readmeState }) }); setToast(`已迁移 ${result.commits ?? commits.length} 条提交、${result.projects ?? projects.length} 个项目`); } catch { setToast("本地预览已生成迁移数据；部署并绑定 D1/R2 后即可写入服务端"); } }; const reset = () => { setCommits(INITIAL_COMMITS); setProjects(INITIAL_PROJECTS); setReadmeState(INITIAL_README_STATE); setSettingsOpen(false); setToast("产品示例数据已恢复"); };
+  const migrate = async () => { try { const result = await apiRequest("/api/migrate/local", { method: "POST", body: JSON.stringify({ commits, projects, readmeState }) }); setToast(`已迁移 ${result.commits ?? commits.length} 条提交、${result.projects ?? projects.length} 个项目`); } catch { setToast("本地预览已生成迁移数据；部署并绑定 D1/R2 后即可写入服务端"); } }; const reset = () => { setCommits(INITIAL_COMMITS); setProjects(buildProjectDigest(INITIAL_PROJECTS)); setReadmeState(INITIAL_README_STATE); setSettingsOpen(false); setToast("产品示例数据已恢复"); };
   const project = route.name === "project" ? projects.find((item) => item.slug === route.slug && (ownerMode || item.visibility === "public")) : null; let page;
-  if (route.name === "overview") page = <Overview commits={orderedCommits} projects={projects} publishedReadme={publishedReadme} onNewCommit={() => setNewCommitOpen(true)} onOpenCommit={setSelectedCommit} />; else if (route.name === "timeline") page = <TimelinePage commits={orderedCommits} onOpenCommit={setSelectedCommit} onNewCommit={() => setNewCommitOpen(true)} />; else if (route.name === "projects") page = <ProjectsPage projects={projects} ownerMode={ownerMode} />; else if (route.name === "project") page = project ? <ProjectDetailPage project={project} ownerMode={ownerMode} onUpdateProject={updateProject} onToast={setToast} /> : <div className="page not-found"><Lock size={45} /><h1>项目不存在或尚未公开</h1><button className="secondary-button" type="button" onClick={() => navigate("/projects")}>返回项目</button></div>; else if (route.name === "resume") page = <ResumePage />; else if (route.name === "release") page = <ReleasePage />; else if (route.name === "readme") page = <PublicReadmePage readme={publishedReadme} />; else if (route.name === "admin-projects" && ownerMode) page = <AdminProjectsPage projects={projects} commits={commits} onImport={(item) => setProjects((current) => [item, ...current])} onUpdateProject={updateProject} onMigrate={migrate} onToast={setToast} />; else if (route.name === "admin-readme" && ownerMode) page = <AdminReadmePage projects={projects} commits={orderedCommits} readmeState={readmeState} onChange={setReadmeState} onToast={setToast} />; else page = <PublicReadmePage readme={publishedReadme} />;
+  if (route.name === "overview") page = <Overview commits={orderedCommits} projects={projects} publishedReadme={publishedReadme} ownerMode={ownerMode} onNewCommit={() => setNewCommitOpen(true)} onOpenCommit={setSelectedCommit} />; else if (route.name === "timeline") page = <TimelinePage commits={orderedCommits} ownerMode={ownerMode} onOpenCommit={setSelectedCommit} onNewCommit={() => setNewCommitOpen(true)} />; else if (route.name === "projects") page = <ProjectsPage projects={projects} ownerMode={ownerMode} />; else if (route.name === "project") page = project ? <ProjectDetailPage project={project} ownerMode={ownerMode} onUpdateProject={updateProject} onToast={setToast} /> : <div className="page not-found"><Lock size={45} /><h1>项目不存在或尚未公开</h1><button className="secondary-button" type="button" onClick={() => navigate("/projects")}>返回项目</button></div>; else if (route.name === "resume") page = <ResumePage />; else if (route.name === "release") page = <ReleasePage />; else if (route.name === "readme") page = <PublicReadmePage readme={publishedReadme} />; else if (route.name === "admin-projects" && ownerMode) page = <AdminProjectsPage projects={projects} commits={commits} onImport={(item) => setProjects((current) => [deriveProjectDigest(item), ...current])} onUpdateProject={updateProject} onMigrate={migrate} onToast={setToast} />; else if (route.name === "admin-readme" && ownerMode) page = <AdminReadmePage projects={projects} commits={orderedCommits} readmeState={readmeState} onChange={setReadmeState} onToast={setToast} />; else page = <PublicReadmePage readme={publishedReadme} />;
   return <div className="app-shell"><AppHeader route={route} ownerMode={ownerMode} needsLogin={serverState.available && !serverState.owner && serverState.githubConfigured} onOwnerToggle={toggleOwner} onOpenSettings={() => setSettingsOpen(true)} /><Sidebar ownerMode={ownerMode} publicProjectCount={projects.filter((item) => item.visibility === "public").length} /><main className="main-content">{page}</main>{ownerMode && <button className="floating-commit" type="button" onClick={() => setNewCommitOpen(true)} aria-label="新建提交"><Plus size={25} weight="bold" /></button>}{newCommitOpen && <CommitModal onClose={() => setNewCommitOpen(false)} onSave={saveCommit} />}{selectedCommit && <CommitDetail commit={selectedCommit} onClose={() => setSelectedCommit(null)} />}{settingsOpen && <SettingsModal ownerMode={ownerMode} onOwnerToggle={toggleOwner} commits={orderedCommits} projects={projects} onClose={() => setSettingsOpen(false)} onReset={reset} />}{toast && <div className="toast"><Check size={19} weight="bold" /> {toast}</div>}</div>;
 }

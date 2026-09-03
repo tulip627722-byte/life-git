@@ -32,6 +32,10 @@
     },
     "visibility": "public"
   },
+  "contact": {
+    "tara_url": "https://www.tara.chat",
+    "xiaohongshu_url": "https://www.xiaohongshu.com/user/profile/596cb2624f8fd64ac9523346"
+  },
   "personality": {
     "core_traits": [
       {

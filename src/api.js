@@ -72,16 +72,58 @@ export async function importPublicGithubRepository(value) {
       blockedReason: kind === "blocked" ? "敏感或依赖文件不会被预览" : undefined,
     };
   });
+  const prioritized = files
+    .filter((file) => file.kind !== "blocked" && file.kind !== "binary")
+    .filter((file) => file.size <= 64 * 1024)
+    .sort((a, b) => {
+      if (a.path.match(/(^|\/)readme\.md$/i)) return -1;
+      if (b.path.match(/(^|\/)readme\.md$/i)) return 1;
+      if (a.path.match(/(^|\/)(index|main|app)\.(jsx?|tsx?|py|go|js|ts)$/i)) return -1;
+      if (b.path.match(/(^|\/)(index|main|app)\.(jsx?|tsx?|py|go|js|ts)$/i)) return 1;
+      return 0;
+    });
+  const candidates = [...new Map(prioritized.slice(0, 10).map((file) => [file.path, file])).values()];
+
   let readme = `# ${repository.name}\n\n${repository.description || "导入自 GitHub 的项目。"}`;
   const readmeFile = files.find((file) => /(^|\/)readme\.md$/i.test(file.path));
-  if (readmeFile) {
+  const readmeReadTask = async () => {
+    if (!readmeFile) return null;
     const readmeResponse = await fetch(readmeFile.remoteUrl);
-    if (readmeResponse.ok) {
-      readme = await readmeResponse.text();
-      readmeFile.content = readme;
-      readmeFile.kind = "markdown";
-    }
+    if (!readmeResponse.ok) return null;
+    const text = await readmeResponse.text();
+    readme = text;
+    readmeFile.content = text;
+    readmeFile.kind = "markdown";
+    return text;
+  };
+
+  const readCodeTasks = candidates
+    .filter((file) => file !== readmeFile)
+    .slice(0, 6)
+    .map(async (file) => {
+      if (file.kind !== "code" && file.kind !== "markdown") return null;
+      if (file.size > 2 * 1024 * 1024) return null;
+      try {
+        const response = await fetch(file.remoteUrl);
+        if (!response.ok) return null;
+        file.content = await response.text();
+        return file.path;
+      } catch {
+        return null;
+      }
+    });
+
+  try {
+    await readmeReadTask();
+  } catch {
+    // Keep generated fallback readme.
   }
+  try {
+    await Promise.allSettled(readCodeTasks);
+  } catch {
+    // Keep best-effort content; import should continue.
+  }
+
   return { repository, files, readme };
 }
 

@@ -71,6 +71,11 @@ const experiences = publicOnly(profileImport.experiences);
 export const IMPORTED_PROFILE = {
   displayName: profileImport.profile.display_name,
   englishName: profileImport.profile.english_name,
+  contact: {
+    github: profileImport.contact?.github || "",
+    taraUrl: profileImport.contact?.tara_url || profileImport.contact?.tara || "",
+    xiaohongshuUrl: profileImport.contact?.xiaohongshu_url || profileImport.contact?.xiaohongshu || "",
+  },
   headline: profileImport.profile.headline,
   tagline: profileImport.profile.tagline,
   summary: trim(profileImport.profile.short_intro),

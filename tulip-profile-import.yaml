@@ -25,6 +25,8 @@ contact:
   email: ""
   phone: ""
   github: "https://github.com/tulip627722-byte"
+  tara_url: ""                  # 你的 TARA 主页链接
+  xiaohongshu_url: ""            # 你的小红书主页链接
   website: ""
   linkedin: ""
   visibility: private            # 联系方式默认不出现在公开网页
