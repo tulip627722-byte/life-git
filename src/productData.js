@@ -76,8 +76,8 @@ const GITHUB_PROJECTS = [
       { src: "/assets/bmo-hackathon-device.jpg", alt: "Adventure X 黑客松现场的 BMO 实体原型", caption: "现场原型：把语音、屏幕和实体按键放进一个可交互的 BMO 外壳。" },
       { src: "/assets/bmo-hackathon-character.jpg", alt: "BMO 概念形象", caption: "概念形象：用熟悉而有情绪的角色感，降低人与 Agent 第一次互动的距离。" },
     ],
-    coverImage: "/assets/bmo-hackathon-device.jpg",
-    coverAlt: "Adventure X 黑客松现场的 BMO 实体原型",
+    coverImage: "/assets/cover-bmo.jpg",
+    coverAlt: "黑客松深夜桌面：BMO 实体机器人正在屏幕上弹出确认",
     sourceType: "github", githubUrl: `https://github.com/${githubOwner}/advx-bmo`, repoFullName: `${githubOwner}/advx-bmo`, defaultBranch: "main", headSha: "ac2c249", visibility: "public", syncStatus: "synced", lastSyncedAt: "2026-07-25T10:19:23Z",
     technologies: ["C", "LVGL", "IoT", "Agent"], readme: readmes.bmo,
     files: [
